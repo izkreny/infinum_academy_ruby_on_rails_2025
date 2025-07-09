@@ -7,4 +7,15 @@
 #  "This homework is taking too long" => "This krowemoh is gnikat too long"
 #  "One change here" => "One egnahc here"
 
-def spinning_words(sentence); end
+def spinning_words(sentence)
+  sentence
+    .split(' ')
+    .map do |word|
+      if word.length >= 5
+        word.reverse
+      else
+        word
+      end
+    end
+    .join(' ')
+end
