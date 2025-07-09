@@ -17,17 +17,17 @@
 
 def holes(number) # rubocop:disable Metrics/MethodLength
   number_of_holes = {
-    '0' => 1,
-    '1' => 0,
-    '2' => 0,
-    '3' => 0,
-    '4' => 1,
-    '5' => 0,
-    '6' => 1,
-    '7' => 0,
-    '8' => 2,
-    '9' => 1
+    0 => 1,
+    1 => 0,
+    2 => 0,
+    3 => 0,
+    4 => 1,
+    5 => 0,
+    6 => 1,
+    7 => 0,
+    8 => 2,
+    9 => 1
   }
 
-  number.to_s.chars.reduce(0) { |sum, digit| sum + number_of_holes[digit] }
+  number.digits.reduce(0) { |sum, digit| sum + number_of_holes[digit] }
 end
