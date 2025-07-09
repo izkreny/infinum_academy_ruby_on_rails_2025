@@ -17,4 +17,19 @@
 # character(eg. "krpa krpa sava sava") and it should return a string where each word is converted to
 # Satrovacki slang.
 
-def shatro(sentence); end
+def shatro(sentence) # rubocop:disable Metrics/MethodLength
+  sentence
+    .split(' ')
+    .map do |word|
+      if word.length < 3
+        word
+      else
+        word
+          .split(/(^[^aeiou]*[aeiou])/)
+          .slice(1..)
+          .reverse
+          .join
+      end
+    end
+    .join(' ')
+end
