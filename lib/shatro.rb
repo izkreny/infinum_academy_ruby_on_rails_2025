@@ -19,17 +19,15 @@
 
 def shatro(sentence) # rubocop:disable Metrics/MethodLength
   sentence
-    .split(' ')
+    .split
     .map do |word|
-      if word.length < 3
-        word
-      else
-        word
-          .split(/(^[^aeiou]*[aeiou])/)
-          .slice(1..)
-          .reverse
-          .join
-      end
+      next word if word.length < 3
+
+      word
+        .split(/(^[^aeiou]*[aeiou])/)
+        .slice(1..)
+        .reverse
+        .join
     end
     .join(' ')
 end
