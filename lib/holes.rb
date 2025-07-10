@@ -29,5 +29,5 @@ def holes(number) # rubocop:disable Metrics/MethodLength
     9 => 1
   }
 
-  number.digits.reduce(0) { |sum, digit| sum + number_of_holes[digit] }
+  number.digits.sum { |digit| number_of_holes[digit] }
 end
