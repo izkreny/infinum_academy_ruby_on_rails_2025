@@ -9,13 +9,7 @@
 
 def spinning_words(sentence)
   sentence
-    .split(' ')
-    .map do |word|
-      if word.length >= 5
-        word.reverse
-      else
-        word
-      end
-    end
+    .split
+    .map { |word| word.length >= 5 ? word.reverse : word }
     .join(' ')
 end
