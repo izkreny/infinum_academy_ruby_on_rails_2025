@@ -15,9 +15,8 @@ def all_letters?(sentence)
              .delete('^a-z')
              .chars
              .uniq
-             .sort
 
-  alphabet == letters
+  alphabet.length == letters.length
 end
 
 # Draft of an idea that could be efficient in case of EXTRA LARGE sentences?
