@@ -5,6 +5,7 @@ RSpec.describe 'shatro', :shatro do
     expect(shatro('gatsby hlace i krunicu')).to eq('tsbyga cehla i nicukru')
     expect(shatro('gramofona ima sedam')).to eq('mofonagra mai damse')
     expect(shatro('niko nista da ne zucne')).to eq('koni stani da ne cnezu')
+    expect(shatro('otok krk ima aerodrom')).to eq('toko krk mai erodroma')
     expect(shatro('ab')).to eq('ab')
   end
 end
