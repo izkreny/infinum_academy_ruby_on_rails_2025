@@ -21,7 +21,8 @@ def shatro(sentence) # rubocop:disable Metrics/MethodLength
   sentence
     .split
     .map do |word|
-      next word if word.length < 3
+      next word if     word.length < 3
+      next word unless word.match?(/[aeiou]/)
 
       word
         .split(/(^[^aeiou]*[aeiou])/)
