@@ -21,8 +21,7 @@ end
 
 class String
   def ascii_sum
-    string = self
-    string.each_char.reduce(0) { |sum, char| sum + char.ord }
+    chars.sum(&:ord)
   end
 end
 
