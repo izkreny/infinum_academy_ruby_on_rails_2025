@@ -10,7 +10,7 @@ def sum_digits(number)
   return number if number < 10
 
   total = number
-  total = total.digits.reduce(0) { |sum, digit| sum + digit } while total >= 10
+  total = total.digits.sum while total >= 10
 
   total
 end
