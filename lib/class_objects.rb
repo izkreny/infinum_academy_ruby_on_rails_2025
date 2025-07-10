@@ -14,4 +14,20 @@
 #    FalseClass => [false, false]
 #  }
 
-def class_objects(elements); end
+# TODO: This is the way! BUT, it creates only one arrray that each key shares, needs fix.
+# def class_objects(elements)
+#   elements.reduce(Hash.new(Array.new)) do |hash, element|
+#     hash[element.class] = hash[element.class] << element
+#     hash
+#   end
+# end
+
+def class_objects(elements)
+  hash = {}
+  elements.each do |element|
+    hash[element.class] = [] unless hash.key?(element.class)
+    hash[element.class] << element
+  end
+
+  hash
+end
