@@ -9,8 +9,5 @@
 def sum_digits(number)
   return number if number < 10
 
-  total = number
-  total = total.digits.sum while total >= 10
-
-  total
+  sum_digits(number.digits.sum)
 end
