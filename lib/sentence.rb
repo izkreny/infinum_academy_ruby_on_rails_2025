@@ -25,7 +25,44 @@
 #      and exposes 1 public method `Word#to_shatro`
 #      the `Word#characters` attribute reader
 #   3. create a Character class which accepts only 1 characters
-#      and exposes 1 public method `Word#vowel?`
+#      and exposes 1 public method `Character#vowel?`
+
+class Character
+  def initialize(character)
+    @character = String.new(character)
+  end
+
+  def vowel?
+    @character.downcase.match?(/[aeiou]/)
+  end
+end
+
+class Word
+  attr_reader :characters
+
+  def initialize(word)
+    @characters = Array.new(word.chars.map { |char| Character.new(char) })
+  end
+
+  def to_shatro
+    first_vowel_index = @characters.index(&:vowel?)
+    word = @characters.map { |char| char.instance_variable_get(:@character) }.join
+
+    return word if word.length < 3
+    return word if first_vowel_index.nil?
+
+    word[first_vowel_index + 1..] + word[..first_vowel_index]
+  end
+end
 
 class Sentence
+  attr_reader :words
+
+  def initialize(sentence)
+    @words = Array.new(sentence.split.map { |word| Word.new(word) })
+  end
+
+  def to_shatro
+    @words.map(&:to_shatro).join(' ')
+  end
 end
