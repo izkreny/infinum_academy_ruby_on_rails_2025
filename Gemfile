@@ -1,7 +1,12 @@
 source 'https://rubygems.org'
 
+gem 'base64'
+gem 'benchmark'
+gem 'ostruct'
 gem 'overcommit'
 gem 'pry'
+gem 'racc'
+gem 'reline'
 gem 'rspec'
 gem 'rubocop'
 gem 'rubocop-rspec'
