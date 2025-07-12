@@ -15,4 +15,24 @@
 #   https://regos.hr/app/uploads/2018/07/KONTROLA-OIB-a.pdf
 
 class Oib
+  def initialize(oib)
+    @oib = String.new(oib)
+
+    raise ArgumentError, 'Code is too short'               if @oib.length < 11
+    raise ArgumentError, 'Code is too long'                if @oib.length > 11
+    raise ArgumentError, 'Code should contain only digits' if @oib.match?(/[^0-9]/) # alias: /\D/
+  end
+
+  def valid?
+    control_digit = 11 - @oib
+                    .chars
+                    .map(&:to_i)
+                    .slice(..9)
+                    .reduce(10) do |remainder, digit|
+                      remainder = (remainder + digit) % 10
+                      ((remainder.zero? ? 10 : remainder) * 2) % 11
+                    end
+
+    @oib[10].to_i == (control_digit == 10 ? 0 : control_digit)
+  end
 end
