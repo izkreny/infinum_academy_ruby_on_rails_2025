@@ -29,7 +29,7 @@
 
 class Character
   def initialize(character)
-    @character = String.new(character)
+    @character = character
   end
 
   def vowel?
@@ -41,7 +41,7 @@ class Word
   attr_reader :characters
 
   def initialize(word)
-    @characters = Array.new(word.chars.map { |char| Character.new(char) })
+    @characters = word.chars.map { |char| Character.new(char) }
   end
 
   def to_shatro
@@ -59,7 +59,7 @@ class Sentence
   attr_reader :words
 
   def initialize(sentence)
-    @words = Array.new(sentence.split.map { |word| Word.new(word) })
+    @words = sentence.split.map { |word| Word.new(word) }
   end
 
   def to_shatro
