@@ -24,5 +24,64 @@
 #  * activities should respond to `#participants` which return the players that were added to the activity
 #  * an instance of the `Scrambler` class should allow calling `Scrambler#scramble` multiple times
 
+class Participant
+  attr_reader :team
+
+  def initialize(codename:, team:)
+    @codename = codename
+    @team     = team
+  end
+end
+
+class Activity
+  attr_reader   :id, :slots
+  attr_accessor :participants
+
+  def initialize(id:, slots:)
+    @id           = id
+    @slots        = slots
+    @participants = []
+  end
+
+  def slots_full?
+    @slots <= @participants.length
+  end
+end
+
 class Scrambler
+  attr_reader :players, :activities
+
+  def initialize(players:, activities:) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
+    raise RuntimeError unless players.length    == players.group_by    { |player| player[:codename] }.length
+    raise RuntimeError unless activities.length == activities.group_by { |activity| activity[:id]   }.length
+
+    @players         = players.map { |player| Participant.new(codename: player[:codename], team: player[:team]) }
+    @players_by_team = @players.shuffle.group_by(&:team)
+    @activities      = activities.map { |activity| Activity.new(id: activity[:id], slots: activity[:slots]) }
+  end
+
+  def scramble
+    while activities_available? && players_available?
+      @players_by_team.each_value do |players|
+        @activities.each do |activity|
+          next activity if activity.slots_full?
+          next players  if players.empty?
+
+          activity.participants << players.shift
+        end
+      end
+    end
+
+    self
+  end
+
+  private
+
+  def activities_available?
+    @activities.map(&:slots_full?).any?(false)
+  end
+
+  def players_available?
+    @players_by_team.map { |_team, players| players.empty? }.any?(false)
+  end
 end
