@@ -16,11 +16,11 @@
 
 class Oib
   def initialize(oib)
-    @oib = String.new(oib)
+    raise ArgumentError, 'Code is too short'               if oib.length < 11
+    raise ArgumentError, 'Code is too long'                if oib.length > 11
+    raise ArgumentError, 'Code should contain only digits' if oib.match?(/[^0-9]/) # alias: /\D/
 
-    raise ArgumentError, 'Code is too short'               if @oib.length < 11
-    raise ArgumentError, 'Code is too long'                if @oib.length > 11
-    raise ArgumentError, 'Code should contain only digits' if @oib.match?(/[^0-9]/) # alias: /\D/
+    @oib = oib
   end
 
   def valid?
