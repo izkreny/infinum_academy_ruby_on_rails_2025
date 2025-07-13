@@ -40,7 +40,23 @@
 #  )
 
 class Item
+  def initialize(weight:, quantity: 1)
+    @weight   = weight
+    @quantity = quantity
+  end
+
+  def total_weight
+    @weight * @quantity
+  end
 end
 
-class Box
+class Box < Item
+  def initialize(weight:, items:)
+    super(weight: weight)
+    @items = items
+  end
+
+  def total_weight
+    @weight + @items.sum(&:total_weight)
+  end
 end
