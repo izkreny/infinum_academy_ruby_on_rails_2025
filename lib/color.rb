@@ -39,4 +39,65 @@
 #   * https://github.com/infinum-academy/rails-student-materials-2022/blob/main/documentation/colors.md
 
 class Color
+  def initialize(red, green, blue)
+    raise ArgumentError, 'Red color number is out of range (0..255)'   unless (0..255).include?(red)
+    raise ArgumentError, 'Green color number is out of range (0..255)' unless (0..255).include?(green)
+    raise ArgumentError, 'Blue color number is out of range (0..255)'  unless (0..255).include?(blue)
+
+    @red     = red
+    @green   = green
+    @blue    = blue
+    rgb      = [red, green, blue].map { |color| color / 255.0 }
+    @rgb_min = rgb.min
+    @rgb_max = rgb.max
+  end
+
+  # Color brightness or lightness
+  def luminosity
+    (0.5 * (@rgb_max + @rgb_min)).round(3)
+  end
+
+  # Color pureness
+  def saturation
+    return 0 if [0, 1].include?(luminosity)
+
+    ((@rgb_max - @rgb_min) / (1 - ((2 * luminosity) - 1).abs)).round(3)
+  end
+
+  def to_s
+    "##{hex(@red)}#{hex(@green)}#{hex(@blue)}: " \
+    "RGB(#{@red}, #{@green}, #{@blue}); " \
+    "L: #{luminosity}, S: #{saturation}"
+  end
+
+  private
+
+  def hex(number) # rubocop:disable Metrics/MethodLength
+    hexadecimal = {
+      0 => '0',
+      1 => '1',
+      2 => '2',
+      3 => '3',
+      4 => '4',
+      5 => '5',
+      6 => '6',
+      7 => '7',
+      8 => '8',
+      9 => '9',
+      10 => 'A',
+      11 => 'B',
+      12 => 'C',
+      13 => 'D',
+      14 => 'E',
+      15 => 'F'
+    }
+
+    hexadecimal[number / 16] + hexadecimal[number % 16]
+  end
+
+  def <=>(other)
+    return luminosity <=> other.luminosity if saturation == other.saturation
+
+    other.saturation <=> saturation
+  end
 end
