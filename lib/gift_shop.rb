@@ -57,6 +57,6 @@ class Box < Item
   end
 
   def total_weight
-    @weight + @items.sum(&:total_weight)
+    super + @items.sum(&:total_weight)
   end
 end
