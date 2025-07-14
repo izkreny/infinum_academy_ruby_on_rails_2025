@@ -28,6 +28,8 @@
 #      and exposes 1 public method `Character#vowel?`
 
 class Character
+  attr_reader :character
+
   def initialize(character)
     @character = character
   end
@@ -46,7 +48,7 @@ class Word
 
   def to_shatro
     first_vowel_index = @characters.index(&:vowel?)
-    word = @characters.map { |char| char.instance_variable_get(:@character) }.join
+    word = @characters.map(&:character).join
 
     return word if word.length < 3
     return word if first_vowel_index.nil?
