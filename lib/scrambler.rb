@@ -43,17 +43,16 @@ class Activity
     @participants = []
   end
 
-  def slots_full?
-    @slots <= @participants.length
+  def slots_available?
+    @slots > @participants.length
   end
 end
 
 class Scrambler
   attr_reader :players, :activities
 
-  def initialize(players:, activities:) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
-    raise RuntimeError unless players.length    == players.group_by    { |player| player[:codename] }.length
-    raise RuntimeError unless activities.length == activities.group_by { |activity| activity[:id]   }.length
+  def initialize(players:, activities:)
+    validate(players, activities)
 
     @players         = players.map { |player| Participant.new(codename: player[:codename], team: player[:team]) }
     @players_by_team = @players.shuffle.group_by(&:team)
@@ -64,7 +63,7 @@ class Scrambler
     while activities_available? && players_available?
       @players_by_team.each_value do |players|
         @activities.each do |activity|
-          next activity if activity.slots_full?
+          next activity unless activity.slots_available?
           next players  if players.empty?
 
           activity.participants << players.shift
@@ -77,8 +76,13 @@ class Scrambler
 
   private
 
+  def validate(players, activities)
+    raise RuntimeError unless players.length    == players.group_by    { |player| player[:codename] }.length
+    raise RuntimeError unless activities.length == activities.group_by { |activity| activity[:id]   }.length
+  end
+
   def activities_available?
-    @activities.map(&:slots_full?).any?(false)
+    @activities.map(&:slots_available?).any?(true)
   end
 
   def players_available?
