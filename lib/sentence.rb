@@ -35,7 +35,7 @@ class Character
   end
 
   def vowel?
-    @character.downcase.match?(/[aeiou]/)
+    character.downcase.match?(/[aeiou]/)
   end
 end
 
@@ -47,13 +47,17 @@ class Word
   end
 
   def to_shatro
-    first_vowel_index = @characters.index(&:vowel?)
-    word = @characters.map(&:character).join
+    first_vowel_index = characters.index(&:vowel?)
+    word = characters.map(&:character).join
 
     return word if word.length < 3
     return word if first_vowel_index.nil?
 
     word[first_vowel_index + 1..] + word[..first_vowel_index]
+  end
+
+  def vowels_count?
+    characters.count(&:vowel?)
   end
 end
 
@@ -61,10 +65,14 @@ class Sentence
   attr_reader :words
 
   def initialize(sentence)
-    @words = sentence.split.map { |word| Word.new(word) }
+    @words = (sentence.nil? ? '' : sentence).split.map { |word| Word.new(word) }
   end
 
   def to_shatro
-    @words.map(&:to_shatro).join(' ')
+    words.map(&:to_shatro).join(' ')
+  end
+
+  def vowels_count?
+    words.map(&:vowels_count?).sum
   end
 end
