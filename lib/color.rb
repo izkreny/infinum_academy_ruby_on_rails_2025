@@ -40,16 +40,13 @@
 
 class Color
   def initialize(red, green, blue)
-    raise ArgumentError, 'Red color number is out of range (0..255)'   unless (0..255).include?(red)
-    raise ArgumentError, 'Green color number is out of range (0..255)' unless (0..255).include?(green)
-    raise ArgumentError, 'Blue color number is out of range (0..255)'  unless (0..255).include?(blue)
+    validate(red, green, blue)
 
     @red     = red
     @green   = green
     @blue    = blue
-    rgb      = [red, green, blue].map { |color| color / 255.0 }
-    @rgb_min = rgb.min
-    @rgb_max = rgb.max
+    @rgb_min = rgb_to_unit_interval.min
+    @rgb_max = rgb_to_unit_interval.max
   end
 
   # Color brightness or lightness
@@ -72,27 +69,18 @@ class Color
 
   private
 
-  def hex(number) # rubocop:disable Metrics/MethodLength
-    hexadecimal = {
-      0 => '0',
-      1 => '1',
-      2 => '2',
-      3 => '3',
-      4 => '4',
-      5 => '5',
-      6 => '6',
-      7 => '7',
-      8 => '8',
-      9 => '9',
-      10 => 'A',
-      11 => 'B',
-      12 => 'C',
-      13 => 'D',
-      14 => 'E',
-      15 => 'F'
-    }
+  def validate(red, green, blue)
+    raise ArgumentError, 'Red color number is out of range (0..255)'   unless (0..255).include?(red)
+    raise ArgumentError, 'Green color number is out of range (0..255)' unless (0..255).include?(green)
+    raise ArgumentError, 'Blue color number is out of range (0..255)'  unless (0..255).include?(blue)
+  end
 
-    hexadecimal[number / 16] + hexadecimal[number % 16]
+  def rgb_to_unit_interval
+    [@red, @green, @blue].map { |color| color / 255.0 }
+  end
+
+  def hex(number)
+    ((number / 16).to_s(16) + (number % 16).to_s(16)).upcase
   end
 
   def <=>(other)
