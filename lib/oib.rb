@@ -18,11 +18,11 @@ class Oib
   def initialize(oib)
     validate(oib)
 
-    @oib = oib
+    @oib = oib.chars.map(&:to_i)
   end
 
   def valid?
-    @oib[10].to_i == control_digit
+    @oib.last == control_digit
   end
 
   private
@@ -35,8 +35,6 @@ class Oib
 
   def control_digit
     control_digit = 11 - @oib
-                    .chars
-                    .map(&:to_i)
                     .slice(..9)
                     .reduce(10) do |remainder, digit|
                       remainder = (remainder + digit) % 10
