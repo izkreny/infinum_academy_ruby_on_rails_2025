@@ -54,17 +54,16 @@ class Scrambler
   def initialize(players:, activities:)
     validate(players, activities)
 
-    @players         = players.map { |player| Participant.new(codename: player[:codename], team: player[:team]) }
-    @players_by_team = @players.shuffle.group_by(&:team)
-    @activities      = activities.map { |activity| Activity.new(id: activity[:id], slots: activity[:slots]) }
+    @players    = players.map { |player| Participant.new(codename: player[:codename], team: player[:team]) }
+    @activities = activities.map { |activity| Activity.new(id: activity[:id], slots: activity[:slots]) }
   end
 
   def scramble
     while activities_available? && players_available?
-      @players_by_team.each_value do |players|
+      players_sorted_by_team.each_value do |players|
         @activities.each do |activity|
           next activity unless activity.slots_available?
-          next players  if players.empty?
+          next players  if     players.empty?
 
           activity.participants << players.shift
         end
@@ -81,11 +80,30 @@ class Scrambler
     raise RuntimeError unless activities.length == activities.group_by { |activity| activity[:id]   }.length
   end
 
+  def players_sorted_by_team # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+    @players_sorted_by_team ||= {}
+
+    @players
+      # Sort teams by their length (number of players) in descending order and extract team names into an array
+      .map(&:team).tally.to_a.sort_by(&:last).reverse.map(&:first)
+      # Shuffle players a little bit and create a hash with teams and their associated players
+      .each do |team|
+        @players.shuffle.each do |participant|
+          next participant unless participant.team == team
+
+          @players_sorted_by_team[team] = [] unless @players_sorted_by_team.key?(team)
+          @players_sorted_by_team[team] << participant
+        end
+      end
+
+    @players_sorted_by_team
+  end
+
   def activities_available?
     @activities.map(&:slots_available?).any?(true)
   end
 
   def players_available?
-    @players_by_team.map { |_team, players| players.empty? }.any?(false)
+    players_sorted_by_team.map { |_team, players| players.empty? }.any?(false)
   end
 end

@@ -168,7 +168,7 @@ RSpec.describe Scrambler, :scrambler do
       result = described_class.new(**data).scramble
       activity2 = result.activities.find { |act| act.id == 2 }
 
-      expect(activity2.participants.map(&:team)).to match_array([:ios, :android])
+      expect(activity2.participants.map(&:team)).to match_array([:ios, :android]) # rubocop:disable RSpec/MatchArray
     end
   end
 
@@ -210,13 +210,13 @@ RSpec.describe Scrambler, :scrambler do
     it 'first activity has 1 player from all teams' do
       activity = result.activities.find { |act| act.id == 1 }
 
-      expect(activity.participants.map(&:team)).to match_array([:ios, :android, :rails])
+      expect(activity.participants.map(&:team)).to match_array([:ios, :android, :rails]) # rubocop:disable RSpec/MatchArray
     end
 
     it 'third activity has 1 player from all teams' do
       activity = result.activities.find { |act| act.id == 3 }
 
-      expect(activity.participants.map(&:team).uniq).to match_array([:ios, :android, :rails])
+      expect(activity.participants.map(&:team).uniq).to match_array([:ios, :android, :rails]) # rubocop:disable RSpec/MatchArray
     end
   end
 
@@ -258,7 +258,99 @@ RSpec.describe Scrambler, :scrambler do
     it 'second activity has 1 player from all teams' do
       activity = result.activities.find { |act| act.id == 2 }
 
-      expect(activity.participants.map(&:team)).to match_array([:ios, :android])
+      expect(activity.participants.map(&:team)).to match_array([:ios, :android]) # rubocop:disable RSpec/MatchArray
+    end
+  end
+
+  context "when activities' slots and teams' lengths are equal in length and equally lined up" do
+    let(:data) do
+      {
+        players: [
+          { codename: 'john1', team: :ios },
+          { codename: 'john2', team: :android },
+          { codename: 'john3', team: :android },
+          { codename: 'john4', team: :rails },
+          { codename: 'john5', team: :rails },
+          { codename: 'john6', team: :rails }
+        ],
+        activities: [
+          { id: 1, slots: 1 },
+          { id: 2, slots: 2 },
+          { id: 3, slots: 3 }
+        ]
+      }
+    end
+
+    let(:result) { described_class.new(**data).scramble }
+
+    it 'all activites are ready', :aggregate_failures do
+      activity1 = result.activities.find { |act| act.id == 1 }
+      activity2 = result.activities.find { |act| act.id == 2 }
+      activity3 = result.activities.find { |act| act.id == 3 }
+
+      expect(activity1.participants.size).to eq activity1.slots
+      expect(activity2.participants.size).to eq activity2.slots
+      expect(activity3.participants.size).to eq activity3.slots
+    end
+
+    it 'no activity has 2 participants from the same team' do
+      result = described_class.new(**data).scramble
+      activity1 = result.activities.find { |act| act.id == 1 }
+      activity2 = result.activities.find { |act| act.id == 2 }
+      activity3 = result.activities.find { |act| act.id == 3 }
+      teams_in_activity1 = activity1.participants.map(&:team)
+      teams_in_activity2 = activity2.participants.map(&:team)
+      teams_in_activity3 = activity3.participants.map(&:team)
+
+      expect(teams_in_activity1).to match_array teams_in_activity1.uniq
+      expect(teams_in_activity2).to match_array teams_in_activity2.uniq
+      expect(teams_in_activity3).to match_array teams_in_activity3.uniq
+    end
+  end
+
+  context 'when you have 3 teams with different number of players and 3 activities with 2 slots each' do
+    let(:data) do
+      {
+        players: [
+          { codename: 'john1', team: :ios },
+          { codename: 'john2', team: :android },
+          { codename: 'john3', team: :android },
+          { codename: 'john4', team: :rails },
+          { codename: 'john5', team: :rails },
+          { codename: 'john6', team: :rails }
+        ],
+        activities: [
+          { id: 1, slots: 2 },
+          { id: 2, slots: 2 },
+          { id: 3, slots: 2 }
+        ]
+      }
+    end
+
+    let(:result) { described_class.new(**data).scramble }
+
+    it 'all activites are ready', :aggregate_failures do
+      activity1 = result.activities.find { |act| act.id == 1 }
+      activity2 = result.activities.find { |act| act.id == 2 }
+      activity3 = result.activities.find { |act| act.id == 3 }
+
+      expect(activity1.participants.size).to eq activity1.slots
+      expect(activity2.participants.size).to eq activity2.slots
+      expect(activity3.participants.size).to eq activity3.slots
+    end
+
+    it 'no activity has participants from the same team' do
+      result = described_class.new(**data).scramble
+      activity1 = result.activities.find { |act| act.id == 1 }
+      activity2 = result.activities.find { |act| act.id == 2 }
+      activity3 = result.activities.find { |act| act.id == 3 }
+      teams_in_activity1 = activity1.participants.map(&:team)
+      teams_in_activity2 = activity2.participants.map(&:team)
+      teams_in_activity3 = activity3.participants.map(&:team)
+
+      expect(teams_in_activity1).to match_array teams_in_activity1.uniq
+      expect(teams_in_activity2).to match_array teams_in_activity2.uniq
+      expect(teams_in_activity3).to match_array teams_in_activity3.uniq
     end
   end
 
