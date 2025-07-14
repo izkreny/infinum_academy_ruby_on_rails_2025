@@ -40,18 +40,19 @@
 
 class Color
   def initialize(red, green, blue)
-    validate(red, green, blue)
-
     @red     = red
     @green   = green
     @blue    = blue
+
+    validate
+
     @rgb_min = rgb_to_unit_interval.min
     @rgb_max = rgb_to_unit_interval.max
   end
 
   # Color brightness or lightness
   def luminosity
-    (0.5 * (@rgb_max + @rgb_min)).round(3)
+    @luminosity ||= (0.5 * (@rgb_max + @rgb_min)).round(3)
   end
 
   # Color pureness
@@ -69,10 +70,10 @@ class Color
 
   private
 
-  def validate(red, green, blue)
-    raise ArgumentError, 'Red color number is out of range (0..255)'   unless (0..255).include?(red)
-    raise ArgumentError, 'Green color number is out of range (0..255)' unless (0..255).include?(green)
-    raise ArgumentError, 'Blue color number is out of range (0..255)'  unless (0..255).include?(blue)
+  def validate
+    raise ArgumentError, 'Red color number is out of range (0..255)'   unless (0..255).include?(@red)
+    raise ArgumentError, 'Green color number is out of range (0..255)' unless (0..255).include?(@green)
+    raise ArgumentError, 'Blue color number is out of range (0..255)'  unless (0..255).include?(@blue)
   end
 
   def rgb_to_unit_interval
