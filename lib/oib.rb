@@ -16,14 +16,24 @@
 
 class Oib
   def initialize(oib)
-    raise ArgumentError, 'Code is too short'               if oib.length < 11
-    raise ArgumentError, 'Code is too long'                if oib.length > 11
-    raise ArgumentError, 'Code should contain only digits' if oib.match?(/[^0-9]/) # alias: /\D/
+    validate(oib)
 
     @oib = oib
   end
 
   def valid?
+    @oib[10].to_i == control_digit
+  end
+
+  private
+
+  def validate(oib)
+    raise ArgumentError, 'Code is too short'               if oib.length < 11
+    raise ArgumentError, 'Code is too long'                if oib.length > 11
+    raise ArgumentError, 'Code should contain only digits' if oib.match?(/[^0-9]/) # alias: /\D/
+  end
+
+  def control_digit
     control_digit = 11 - @oib
                     .chars
                     .map(&:to_i)
@@ -33,6 +43,6 @@ class Oib
                       ((remainder.zero? ? 10 : remainder) * 2) % 11
                     end
 
-    @oib[10].to_i == (control_digit == 10 ? 0 : control_digit)
+    control_digit == 10 ? 0 : control_digit
   end
 end
