@@ -79,29 +79,22 @@ class Scrambler
     self
   end
 
-  def scramble_i
-    sorted_players_by_team_size.each do |player|
-      break unless activities_available? # In case total_number_of_players > total_number_of_slots
-
-      activity = activities
-                 .select(&:slots_available?)
-                 .min_by { |activity| activity.participants_count(team: player.team) }
-      activity.participants << player
-    end
-
-    self
-  end
-
-  def scramble_ii # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-    sorted_players_by_team_size.each do |player|
+  def scramble_criss_cross # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+    players_criss_cross.each do |player|
       break unless activities_available? # In case total_number_of_players > total_number_of_slots
 
       activities_available = activities.select(&:slots_available?)
       if activities_available.map { |activity| activity.participants_count(team: player.team) }.uniq.length.equal?(1)
-        activity = activities_available.max_by(&:slots) # min_by don't work as well in all cases
+        activity = activities_available.max_by(&:slots)
       else
         activity = activities_available.min_by { |activity| activity.participants_count(team: player.team) }
       end
+
+      # This desn't work unfortunately with players sorted by team size or criss-crossed
+      # activity = activities
+      #            .select(&:slots_available?)
+      #            .min_by { |activity| activity.participants_count(team: player.team) }
+
       activity.participants << player
     end
 
@@ -113,6 +106,27 @@ class Scrambler
   def validate(players, activities)
     raise RuntimeError unless players.length    == players.group_by    { |player| player[:codename] }.length
     raise RuntimeError unless activities.length == activities.group_by { |activity| activity[:id]   }.length
+  end
+
+  def players_criss_cross # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+    number_of_players = @players.map(&:team).tally
+    players_mix = []
+
+    players_by_team = @players
+                      .shuffle
+                      .sort_by(&:team)
+                      .sort { |p1, p2| number_of_players[p2.team] <=> number_of_players[p1.team] }
+                      .group_by(&:team)
+
+    while players_by_team.map { |_team, players| players.empty? }.any?(false)
+      players_by_team.each_value do |players|
+        next players if players.empty?
+
+        players_mix << players.shift
+      end
+    end
+
+    players_mix
   end
 
   def sorted_players_by_team_size
