@@ -45,6 +45,7 @@ group :development, :test do
 
   # Ruby on Rails academy
   gem 'overcommit', require: false
+  gem 'rspec-rails'
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-rspec', require: false
