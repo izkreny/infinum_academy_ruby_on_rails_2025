@@ -28,8 +28,8 @@ class Participant
   attr_reader :team
 
   def initialize(codename:, team:)
-    @codename = codename
-    @team     = team
+    @codename  = codename
+    @team      = team
   end
 end
 
@@ -46,6 +46,12 @@ class Activity
   def slots_available?
     @slots > @participants.length
   end
+
+  def participants_count(team: nil)
+    return participants.length if team.nil?
+
+    participants.count { |player| player.team == team }
+  end
 end
 
 class Scrambler
@@ -54,13 +60,13 @@ class Scrambler
   def initialize(players:, activities:)
     validate(players, activities)
 
-    @players    = players.map { |player| Participant.new(codename: player[:codename], team: player[:team]) }
+    @players = players.map { |player| Participant.new(codename: player[:codename], team: player[:team]) }
     @activities = activities.map { |activity| Activity.new(id: activity[:id], slots: activity[:slots]) }
   end
 
   def scramble
     while activities_available? && players_available?
-      players_sorted_by_team.each_value do |players|
+      players_by_team_sorted.each_value do |players|
         @activities.each do |activity|
           next activity unless activity.slots_available?
           next players  if     players.empty?
@@ -73,6 +79,35 @@ class Scrambler
     self
   end
 
+  def scramble_i
+    sorted_players_by_team_size.each do |player|
+      break unless activities_available? # In case total_number_of_players > total_number_of_slots
+
+      activity = activities
+                 .select(&:slots_available?)
+                 .min_by { |activity| activity.participants_count(team: player.team) }
+      activity.participants << player
+    end
+
+    self
+  end
+
+  def scramble_ii # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+    sorted_players_by_team_size.each do |player|
+      break unless activities_available? # In case total_number_of_players > total_number_of_slots
+
+      activities_available = activities.select(&:slots_available?)
+      if activities_available.map { |activity| activity.participants_count(team: player.team) }.uniq.length.equal?(1)
+        activity = activities_available.max_by(&:slots) # min_by don't work as well in all cases
+      else
+        activity = activities_available.min_by { |activity| activity.participants_count(team: player.team) }
+      end
+      activity.participants << player
+    end
+
+    self
+  end
+
   private
 
   def validate(players, activities)
@@ -80,8 +115,17 @@ class Scrambler
     raise RuntimeError unless activities.length == activities.group_by { |activity| activity[:id]   }.length
   end
 
-  def players_sorted_by_team # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-    @players_sorted_by_team ||= {}
+  def sorted_players_by_team_size
+    number_of_players = @players.map(&:team).tally
+
+    @players
+      .shuffle
+      .sort_by(&:team)
+      .sort { |p1, p2| number_of_players[p2.team] <=> number_of_players[p1.team] }
+  end
+
+  def players_by_team_sorted # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+    players_by_team = {}
 
     @players
       # Sort teams by their length (number of players) in descending order and extract team names into an array
@@ -91,12 +135,12 @@ class Scrambler
         @players.shuffle.each do |participant|
           next participant unless participant.team == team
 
-          @players_sorted_by_team[team] = [] unless @players_sorted_by_team.key?(team)
-          @players_sorted_by_team[team] << participant
+          players_by_team[team] = [] unless players_by_team.key?(team)
+          players_by_team[team] << participant
         end
       end
 
-    @players_sorted_by_team
+    @players_by_team_sorted ||= players_by_team
   end
 
   def activities_available?
@@ -104,6 +148,6 @@ class Scrambler
   end
 
   def players_available?
-    players_sorted_by_team.map { |_team, players| players.empty? }.any?(false)
+    players_by_team_sorted.map { |_team, players| players.empty? }.any?(false)
   end
 end
