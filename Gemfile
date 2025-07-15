@@ -44,6 +44,7 @@ group :development, :test do
   gem 'rubocop-rails-omakase', require: false
 
   # Ruby on Rails academy
+  gem 'faraday'
   gem 'overcommit', require: false
   gem 'pg'
   gem 'rspec-rails'
