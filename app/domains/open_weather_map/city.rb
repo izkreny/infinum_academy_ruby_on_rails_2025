@@ -16,7 +16,15 @@ module OpenWeatherMap
       (@temp_k - 273.15).round(2)
     end
 
-    private
+    def self.parse(city)
+      City.new(
+        id: city['id'],
+        lat: city['coord']['lat'],
+        lon: city['coord']['lon'],
+        name: city['name'],
+        temp_k: city['main']['temp']
+      )
+    end
 
     def <=>(other)
       return name <=> other.name if temp == other.temp
