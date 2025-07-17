@@ -21,7 +21,7 @@ module OpenWeatherMap
     end
   end
 
-  def self.cities(cities)
+  def self.cities(cities) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     city_ids = cities.map { |city| OpenWeatherMap.city(city) }.compact
     return nil if city_ids.empty?
 
