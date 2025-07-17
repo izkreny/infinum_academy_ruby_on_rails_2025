@@ -26,6 +26,32 @@ module OpenWeatherMap
       )
     end
 
+    # Top nearest cities
+    def near_by(count = 5) # rubocop:disable Metrics/MethodLength
+      connection = Faraday.new(
+        url: 'https://api.openweathermap.org/data/2.5/find',
+        params: {
+          lat: @lat,
+          lon: @lon,
+          cnt: count,
+          appid: Rails.application.credentials.open_weather_map_api_key
+        }
+      ) { |builder| builder.response :json }
+
+      begin
+        response = connection.get
+      rescue Exception # rubocop:disable Lint/RescueException
+        Rails.logger.debug 'ERROR: Something went wrong while trying to connect to OpenWeather'
+        nil
+      else
+        response.body.map { |city| OpenWeatherMap::City.parse(city) }
+      end
+    end
+
+    def coldest_near_by(count = 5)
+      near_by(count).min
+    end
+
     def <=>(other)
       return name <=> other.name if temp == other.temp
 
