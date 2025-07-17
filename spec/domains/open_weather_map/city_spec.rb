@@ -21,67 +21,67 @@ RSpec.describe OpenWeatherMap::City do
   end
 
   context 'when we have two City objects' do
-    it 'compares them correctly if a receiver has a lower temperature than the other object' do
-      receiver = described_class.new(
+    it 'compares them correctly if a left one has a lower temperature than the right one' do
+      colder = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.28
       )
-      other = described_class.new(
+      warmer = described_class.new(
         id: 2_152_667, lat: -38.3333, lon: 141.6,
         name: 'Portland', temp_k: 292.29
       )
-      expect(receiver > other).to be false
+      expect(colder < warmer).to be true
     end
 
-    it 'compares them correctly if a receiver has a higher temperature than the other object' do
-      receiver = described_class.new(
+    it 'compares them correctly if a left one has a higher temperature than the right one' do
+      warmer = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
       )
-      other = described_class.new(
+      colder = described_class.new(
         id: 2_152_667, lat: -38.3333, lon: 141.6,
         name: 'Portland', temp_k: 292.28
       )
-      expect(receiver > other).to be true
+      expect(warmer > colder).to be true
     end
 
-    it 'compares them correctly if a receiver has the same temperature as the other object,' \
-       'but the receiver name comes first alphabetically' do
-      receiver = described_class.new(
+    it 'compares them correctly if a left one has the same temperature as the right one,' \
+       'but the left comes first alphabetically' do
+      alphabetically_first = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
       )
-      other = described_class.new(
+      alphabetically_second = described_class.new(
         id: 2_152_667, lat: -38.3333, lon: 141.6,
         name: 'Portland', temp_k: 292.29
       )
-      expect(receiver > other).to be false
+      expect(alphabetically_first < alphabetically_second).to be true
     end
 
-    it 'compares them correctly if a receiver has the same temperature as the other object, ' \
-       'but the receiver name comes second alphabetically' do
-      receiver = described_class.new(
+    it 'compares them correctly if a left one has the same temperature as the right one, ' \
+       'but the left one comes second alphabetically' do
+      alphabetically_second = described_class.new(
         id: 2_152_667, lat: -38.3333, lon: 141.6,
         name: 'Portland', temp_k: 292.29
       )
-      other = described_class.new(
+      alphabetically_first = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
       )
-      expect(receiver > other).to be true
+      expect(alphabetically_second > alphabetically_first).to be true
     end
 
-    it 'compares them correctly if a receiver has the same temperature and name ' \
-       'as the other object' do
-      receiver = described_class.new(
+    it 'compares them correctly if a left one has the same temperature and name ' \
+       'as the right one' do
+      equal_temp_and_name_left = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
       )
-      other = described_class.new(
+      equal_temp_and_name_right = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
       )
-      expect(receiver == other).to be true
+      expect(equal_temp_and_name_left == equal_temp_and_name_right).to be true
     end
   end
 
