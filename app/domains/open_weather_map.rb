@@ -10,7 +10,14 @@ module OpenWeatherMap
         appid: Rails.application.credentials.open_weather_map_api_key
       }
     ) { |builder| builder.response :json }
-    response = connection.get
-    OpenWeatherMap::City.parse(response.body)
+
+    begin
+      response = connection.get
+    rescue Exception # rubocop:disable Lint/RescueException
+      Rails.logger.debug 'ERROR: Something went wrong while trying to connect to OpenWeather'
+      nil
+    else
+      OpenWeatherMap::City.parse(response.body)
+    end
   end
 end
