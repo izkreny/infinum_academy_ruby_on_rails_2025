@@ -1,5 +1,5 @@
 RSpec.describe OpenWeatherMap::City do
-  context 'when a new City object is created' do
+  describe '#new creates a new object and' do
     city = described_class.new(
       id: 2_152_667,
       lat: -38.3333,
@@ -8,7 +8,7 @@ RSpec.describe OpenWeatherMap::City do
       temp_k: 285.58
     )
 
-    it 'correctly initialise all instance variables' do
+    it 'correctly initialises all instance variables' do
       expect(city.id).to   eq 2_152_667
       expect(city.lat).to  eq(-38.3333)
       expect(city.lon).to  eq 141.6
@@ -20,8 +20,8 @@ RSpec.describe OpenWeatherMap::City do
     end
   end
 
-  context 'when we have two City objects' do
-    it 'compares them correctly if a left one has a lower temperature than the right one' do
+  describe 'two new objects' do
+    it 'compare correctly if the left one has a lower temperature than the right one' do
       colder = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.28
@@ -33,7 +33,7 @@ RSpec.describe OpenWeatherMap::City do
       expect(colder < warmer).to be true
     end
 
-    it 'compares them correctly if a left one has a higher temperature than the right one' do
+    it 'compare correctly if the left one has a higher temperature than the right one' do
       warmer = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
@@ -45,7 +45,7 @@ RSpec.describe OpenWeatherMap::City do
       expect(warmer > colder).to be true
     end
 
-    it 'compares them correctly if a left one has the same temperature as the right one,' \
+    it 'compare correctly if their temperature is equal, ' \
        'but the left comes first alphabetically' do
       alphabetically_first = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
@@ -58,8 +58,8 @@ RSpec.describe OpenWeatherMap::City do
       expect(alphabetically_first < alphabetically_second).to be true
     end
 
-    it 'compares them correctly if a left one has the same temperature as the right one, ' \
-       'but the left one comes second alphabetically' do
+    it 'compare correctly if their temperature is equal, ' \
+       'but the left comes second alphabetically' do
       alphabetically_second = described_class.new(
         id: 2_152_667, lat: -38.3333, lon: 141.6,
         name: 'Portland', temp_k: 292.29
@@ -71,8 +71,7 @@ RSpec.describe OpenWeatherMap::City do
       expect(alphabetically_second > alphabetically_first).to be true
     end
 
-    it 'compares them correctly if a left one has the same temperature and name ' \
-       'as the right one' do
+    it 'compare correctly if their temperature and name are equal' do
       equal_temp_and_name_left = described_class.new(
         id: 2_759_794, lat: 52.374, lon: 4.8897,
         name: 'Amsterdam', temp_k: 292.29
@@ -85,7 +84,7 @@ RSpec.describe OpenWeatherMap::City do
     end
   end
 
-  context 'when a City#parse class method is used' do
+  describe '#parse is called with the response argument and' do
     # rubocop:disable Style
     response = {
       "coord" => {
@@ -135,14 +134,14 @@ RSpec.describe OpenWeatherMap::City do
     # rubocop:enable Style
     city = described_class.parse(response)
 
-    it 'correctly initialise all instance variables in a new City object' do
+    it 'correctly initialises all instance variables' do
       expect(city.id).to   eq 2_759_794
       expect(city.lat).to  eq 52.374
       expect(city.lon).to  eq 4.8897
       expect(city.name).to eq 'Amsterdam'
     end
 
-    it 'correctly converts temperature from Kelvin to Celsius in a new City object' do
+    it 'correctly converts temperature from Kelvin to Celsius' do
       expect(city.temp).to eq 20.06
     end
   end
