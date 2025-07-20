@@ -44,6 +44,7 @@ group :development, :test do
   gem 'rubocop-rails-omakase', require: false
 
   # Ruby on Rails academy
+  gem 'annotate'
   gem 'faraday'
   gem 'fuzzy_match', '~> 2.1'
   gem 'overcommit', require: false
