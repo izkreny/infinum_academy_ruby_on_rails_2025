@@ -12,4 +12,7 @@
 class User < ApplicationRecord
   has_many :bookings, dependent: :destroy
   has_many :flights, through: :bookings
+
+  validates :first_name, presence: true, length: { minimum: 2 }
+  validates :email, presence: true, uniqueness: { case_sensitive: false }, format: URI::MailTo::EMAIL_REGEXP
 end

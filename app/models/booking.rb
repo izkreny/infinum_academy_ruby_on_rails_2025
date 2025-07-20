@@ -13,4 +13,16 @@
 class Booking < ApplicationRecord
   belongs_to :flight
   belongs_to :user
+
+  validates :no_of_seats, presence: true, numericality: { only_integer: true, greater_than: 0 }
+  validates :seat_price, presence: true, numericality: { only_integer: true, greater_than: 0 }
+  validate  :flight_departs_in_the_future
+
+  def flight_departs_in_the_future
+    return if flight.nil?
+    return if flight.departs_at.nil?
+    return if flight.departs_at > DateTime.now
+
+    errors.add(flight.name, 'departure time of the flight can not be in the past')
+  end
 end
