@@ -45,6 +45,7 @@ group :development, :test do
 
   # Ruby on Rails academy
   gem 'annotate'
+  gem 'factory_bot_rails'
   gem 'faraday'
   gem 'fuzzy_match', '~> 2.1'
   gem 'overcommit', require: false
@@ -53,6 +54,7 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'rubocop-rails', require: false
   gem 'rubocop-rspec', require: false
+  gem 'shoulda-matchers'
 end
 
 group :development do
