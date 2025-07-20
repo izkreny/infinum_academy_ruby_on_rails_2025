@@ -35,8 +35,8 @@ RSpec/MultipleExpectations:
 Style/MutableConstant:
   Enabled: false
 
-RSpec/ImplicitExpect:
-  EnforcedStyle: 'should'
+# RSpec/ImplicitExpect:
+#   EnforcedStyle: 'should'
 
 Metrics/BlockLength:
   Exclude:

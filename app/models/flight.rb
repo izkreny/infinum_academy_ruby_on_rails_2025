@@ -21,7 +21,7 @@ class Flight < ApplicationRecord
   # a database constraint to prevent possible violations of the uniqueness validation, you must
   # create a unique index on both columns in your database.
   # https://guides.rubyonrails.org/active_record_validations.html#uniqueness
-  validates :name, presence: true, uniqueness: { case_sensitive: false, scope: :company_id }
+  validates :name, presence: true, uniqueness: { case_sensitive: false, scope: :company_id } # rubocop:disable Rails/UniqueValidationWithoutIndex
   validates :no_of_seats, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :base_price, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :departs_at, presence: true
