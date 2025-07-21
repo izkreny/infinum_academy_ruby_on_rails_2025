@@ -23,6 +23,6 @@ class Booking < ApplicationRecord
     return if flight.departs_at.nil?
     return if flight.departs_at > DateTime.now
 
-    errors.add(flight.name, 'departure time of the flight can not be in the past')
+    errors.add(:flight, 'departure time of the flight can not be in the past')
   end
 end
