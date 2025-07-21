@@ -8,7 +8,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to validate_presence_of(:email) }
     it { is_expected.to validate_uniqueness_of(:email).case_insensitive }
     it { should allow_value('user@email.com').for(:email) } # rubocop:disable RSpec/ImplicitExpect
-    it { should allow_value('jeff@amazon').for(:email) } # rubocop:disable RSpec/ImplicitExpect
+    it { should_not allow_value('jeff@amazon').for(:email) } # rubocop:disable RSpec/ImplicitExpect
     it { should_not allow_value('user_email.com').for(:email) } # rubocop:disable RSpec/ImplicitExpect
     it { should_not allow_value('user@email_com').for(:email) } # rubocop:disable RSpec/ImplicitExpect
   end

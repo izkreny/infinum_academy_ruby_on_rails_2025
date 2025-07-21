@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :bookings, dependent: :destroy
   has_many :flights, through: :bookings
 
+  EMAIL_REGEXP = /[\w._%+-]+@[\w.-]+\.\w{2,}/ # URI::MailTo::EMAIL_REGEXP
   validates :first_name, presence: true, length: { minimum: 2 }
-  validates :email, presence: true, uniqueness: { case_sensitive: false }, format: URI::MailTo::EMAIL_REGEXP
+  validates :email, presence: true, uniqueness: { case_sensitive: false }, format: EMAIL_REGEXP
 end
