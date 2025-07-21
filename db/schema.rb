@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_07_17_142321) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_21_175432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -41,6 +41,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_17_142321) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "company_id"
+    t.index "lower((name)::text), company_id", name: "multicolumn_index_flights_on_name_and_company_id", unique: true
     t.index ["company_id"], name: "index_flights_on_company_id"
   end
 
@@ -50,7 +51,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_07_17_142321) do
     t.string "email", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index "lower((email)::text)", name: "functional_index_users_on_email", unique: true
   end
 
   add_foreign_key "bookings", "flights"
