@@ -1,8 +1,7 @@
 RSpec.describe Flight, type: :model do
-  # let(:flight) { create(:flight) }
-  FakeFlight.create
+  subject { create(:flight) }
 
-  describe 'validations' do
+  describe 'validation' do
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name).case_insensitive.scoped_to(:company_id) }
     it { is_expected.to validate_numericality_of(:no_of_seats).only_integer.is_greater_than(0) }
@@ -11,17 +10,25 @@ RSpec.describe Flight, type: :model do
     it { is_expected.to validate_presence_of(:arrives_at) }
   end
 
-  describe 'associations' do
+  describe 'association' do
     it { is_expected.to belong_to(:company) }
     it { is_expected.to have_many(:bookings).dependent(:destroy) }
     it { is_expected.to have_many(:users).through(:bookings) }
   end
 
   describe 'business logic' do
-    it 'departure time must be before the arrival time' do
-      backward_flight = FakeFlight.new
-      backward_flight.departs_at = backward_flight.arrives_at + 1
+    it 'is sad if departure time is after the arrival time' do
+      backward_flight = build(
+        :flight,
+        departs_at: 11.days.from_now,
+        arrives_at: 10.days.from_now
+      )
       expect(backward_flight.valid?).to be false
+    end
+
+    it 'is happy if departure time is before the arrival time' do
+      regular_flight = build(:flight)
+      expect(regular_flight.valid?).to be true
     end
   end
 end

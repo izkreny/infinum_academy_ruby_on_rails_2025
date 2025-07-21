@@ -1,28 +1,29 @@
 RSpec.describe Booking, type: :model do
-  # let(:booking) { create(:booking) }
-  FakeBooking.create
+  subject { create(:booking) }
 
-  describe 'validations' do
+  describe 'validation' do
     it { is_expected.to validate_presence_of(:no_of_seats) }
     it { is_expected.to validate_presence_of(:seat_price) }
     it { is_expected.to validate_numericality_of(:no_of_seats).only_integer.is_greater_than(0) }
     it { is_expected.to validate_numericality_of(:seat_price).only_integer.is_greater_than(0) }
   end
 
-  describe 'associations' do
+  describe 'association' do
     it { is_expected.to belong_to(:flight) }
     it { is_expected.to belong_to(:user) }
   end
 
   describe 'business logic' do
-    it 'departure time of the flight can not be in the past' do
-      past_flight = FakeFlight.new
-      past_flight.departs_at = DateTime.now - 10
-      past_flight.arrives_at = past_flight.departs_at + 1
-      booking_for_the_past_flight = FakeBooking.new
-      booking_for_the_past_flight.flight = past_flight
-
+    it 'is sad if departure time of the flight is in the past' do
+      past_flight = create(:flight, departs_at: 10.days.ago)
+      booking_for_the_past_flight = build(:booking, flight: past_flight)
       expect(booking_for_the_past_flight.valid?).to be false
+    end
+
+    it 'is happy if departure time of the flight is in the future' do
+      regular_flight = create(:flight)
+      booking_for_the_regular_flight = build(:booking, flight: regular_flight)
+      expect(booking_for_the_regular_flight.valid?).to be true
     end
   end
 end

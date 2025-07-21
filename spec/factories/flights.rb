@@ -1,29 +1,10 @@
 FactoryBot.define do
   factory :flight do
-    sequence(:name) { |n| "Flight ##{n}" }
-    no_of_seats { 100 }
-    base_price { 10 }
-    departs_at { DateTime.now + 10 }
-    arrives_at { DateTime.now + 11 }
-    company { create(:company) }
-  end
-end
-
-module FakeFlight
-  def self.new
-    Flight.new(
-      name: "Flight [#{Faker::Number.unique.hexadecimal(digits: 5)}]",
-      no_of_seats: 100,
-      base_price: 10,
-      departs_at: DateTime.now + 10,
-      arrives_at: DateTime.now + 11,
-      company: FakeCompany.create
-    )
-  end
-
-  def self.create
-    flight = new
-    flight.save
-    flight
+    name        { "Flight ##{Faker::Number.unique.number(digits: 5)}" }
+    no_of_seats { rand(50..100) }
+    base_price  { rand(100..200) }
+    departs_at  { rand(5..15).days.from_now }
+    arrives_at  { departs_at.next_day }
+    company
   end
 end
