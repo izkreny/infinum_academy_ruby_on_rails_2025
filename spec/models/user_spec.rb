@@ -10,6 +10,8 @@ RSpec.describe User, type: :model do
     it { should_not allow_value('jeff@amazon').for(:email) } # rubocop:disable RSpec/ImplicitExpect
     it { should_not allow_value('user_email.com').for(:email) } # rubocop:disable RSpec/ImplicitExpect
     it { should_not allow_value('user@email_com').for(:email) } # rubocop:disable RSpec/ImplicitExpect
+    it { is_expected.to have_db_index(:email).unique }
+    it { is_expected.to have_db_index('lower((email)::text)').unique }
   end
 
   describe 'association' do
