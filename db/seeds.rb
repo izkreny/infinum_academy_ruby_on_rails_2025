@@ -7,3 +7,9 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+FactoryBot.create_list(:user, 50)
+FactoryBot.create_list(:flight, 3)
+100.times do
+  FactoryBot.create(:booking, user: User.all.sample, flight: Flight.all.sample)
+end
