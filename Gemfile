@@ -45,6 +45,7 @@ group :development, :test do
 
   # Ruby on Rails academy
   gem 'annotate'
+  gem 'blueprinter'
   gem 'factory_bot_rails'
   gem 'faker'
   gem 'faraday'
