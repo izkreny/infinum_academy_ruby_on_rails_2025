@@ -53,7 +53,7 @@ module Api
       if user.nil?
         render_error_not_found('user')
       elsif user.destroy
-        render json: { user: '' }, status: :ok
+        render json: { user: '' }, status: :no_content
       else
         render_errors_bad_request(user.errors)
       end

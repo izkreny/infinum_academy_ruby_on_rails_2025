@@ -53,7 +53,7 @@ module Api
       if flight.nil?
         render_error_not_found('flight')
       elsif flight.destroy
-        render json: { flight: '' }, status: :ok
+        render json: { flight: '' }, status: :no_content
       else
         render_errors_bad_request(flight.errors)
       end

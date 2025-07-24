@@ -53,7 +53,7 @@ module Api
       if booking.nil?
         render_error_not_found('booking')
       elsif booking.destroy
-        render json: { booking: '' }, status: :ok
+        render json: { booking: '' }, status: :no_content
       else
         render_errors_bad_request(booking.errors)
       end
