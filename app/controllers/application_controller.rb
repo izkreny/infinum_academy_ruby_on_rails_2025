@@ -3,4 +3,12 @@ class ApplicationController < ActionController::Base
   # badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
   skip_before_action :verify_authenticity_token
+
+  def render_error_not_found(model_name)
+    render json: { errors: { model_name => '404 - Not Found' } }, status: :not_found
+  end
+
+  def render_errors_bad_request(object_errors)
+    render json: { errors: object_errors }, status: :bad_request
+  end
 end
