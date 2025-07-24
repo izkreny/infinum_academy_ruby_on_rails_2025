@@ -11,4 +11,10 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  namespace :api do
+    resources :users,     except: [:new, :edit]
+    resources :flights,   except: [:new, :edit]
+    resources :bookings,  except: [:new, :edit]
+    resources :companies, except: [:new, :edit]
+  end
 end
