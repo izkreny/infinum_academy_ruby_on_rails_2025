@@ -5,7 +5,7 @@ module Api
       companies = Company.all
 
       if companies.empty?
-        render json: { errors: { companies: '204 - No Content' } }, status: :no_content
+        head :no_content
       else
         render json: CompanySerializer.render(companies, root: :companies), status: :ok
       end
@@ -53,7 +53,7 @@ module Api
       if company.nil?
         render_error_not_found('company')
       elsif company.destroy
-        render json: { company: '' }, status: :no_content
+        head :no_content
       else
         render_errors_bad_request(company.errors)
       end

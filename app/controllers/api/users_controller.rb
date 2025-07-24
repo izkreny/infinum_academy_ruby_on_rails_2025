@@ -5,7 +5,7 @@ module Api
       users = User.all
 
       if users.empty?
-        render json: { errors: { users: '204 - No Content' } }, status: :no_content
+        head :no_content
       else
         render json: UserSerializer.render(users, root: :users), status: :ok
       end
@@ -53,7 +53,7 @@ module Api
       if user.nil?
         render_error_not_found('user')
       elsif user.destroy
-        render json: { user: '' }, status: :no_content
+        head :no_content
       else
         render_errors_bad_request(user.errors)
       end

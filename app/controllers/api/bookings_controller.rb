@@ -5,7 +5,7 @@ module Api
       bookings = Booking.all
 
       if bookings.empty?
-        render json: { errors: { bookings: '204 - No Content' } }, status: :no_content
+        head :no_content
       else
         render json: BookingSerializer.render(bookings, root: :bookings), status: :ok
       end
@@ -53,7 +53,7 @@ module Api
       if booking.nil?
         render_error_not_found('booking')
       elsif booking.destroy
-        render json: { booking: '' }, status: :no_content
+        head :no_content
       else
         render_errors_bad_request(booking.errors)
       end

@@ -5,7 +5,7 @@ module Api
       flights = Flight.all
 
       if flights.empty?
-        render json: { errors: { flights: '204 - No Content' } }, status: :no_content
+        head :no_content
       else
         render json: FlightSerializer.render(flights, root: :flights), status: :ok
       end
@@ -53,7 +53,7 @@ module Api
       if flight.nil?
         render_error_not_found('flight')
       elsif flight.destroy
-        render json: { flight: '' }, status: :no_content
+        head :no_content
       else
         render_errors_bad_request(flight.errors)
       end
