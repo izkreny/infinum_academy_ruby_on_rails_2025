@@ -1,5 +1,5 @@
 class CompanySerializer < Blueprinter::Base
   identifier :id
 
-  field :name
+  fields :name, :created_at, :updated_at
 end
