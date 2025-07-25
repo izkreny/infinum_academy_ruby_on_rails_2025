@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token
 
   def render_error_not_found(model_name)
-    render json: { errors: { model_name => '404 - Not Found' } }, status: :not_found
+    render json: { errors: { model_name => 'Not Found' } }, status: :not_found
   end
 
   def render_errors_bad_request(object_errors)

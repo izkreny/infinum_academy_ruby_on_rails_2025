@@ -1,5 +1,9 @@
 module Api
   class CompaniesController < ApplicationController
+    attr_reader :company
+
+    before_action :find_company, only: [:show, :update, :destroy]
+
     # GET /companies
     def index
       companies = Company.all
@@ -13,13 +17,7 @@ module Api
 
     # GET /companies/:id
     def show
-      company = find_company
-
-      if company.nil?
-        render_error_not_found('company')
-      else
-        render json: CompanySerializer.render(company, root: :company), status: :ok
-      end
+      render json: CompanySerializer.render(company, root: :company), status: :ok
     end
 
     # POST /companies
@@ -35,11 +33,7 @@ module Api
 
     # PUT & PATCH /companies/:id
     def update
-      company = find_company
-
-      if company.nil?
-        render_error_not_found('company')
-      elsif company.update(company_params)
+      if company.update(company_params)
         render json: CompanySerializer.render(company, root: :company), status: :ok
       else
         render_errors_bad_request(company.errors)
@@ -48,11 +42,7 @@ module Api
 
     # DELETE /companies/:id
     def destroy
-      company = find_company
-
-      if company.nil?
-        render_error_not_found('company')
-      elsif company.destroy
+      if company.destroy
         head :no_content
       else
         render_errors_bad_request(company.errors)
@@ -62,7 +52,8 @@ module Api
     private
 
     def find_company
-      Company.where(id: params[:id]).first
+      @company = Company.where(id: params[:id]).first
+      render_error_not_found('company') if @company.nil?
     end
 
     def company_params

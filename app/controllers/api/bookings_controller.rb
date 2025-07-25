@@ -1,5 +1,9 @@
 module Api
   class BookingsController < ApplicationController
+    attr_reader :booking
+
+    before_action :find_booking, only: [:show, :update, :destroy]
+
     # GET /bookings
     def index
       bookings = Booking.all
@@ -13,13 +17,7 @@ module Api
 
     # GET /bookings/:id
     def show
-      booking = find_booking
-
-      if booking.nil?
-        render_error_not_found('booking')
-      else
-        render json: BookingSerializer.render(booking, root: :booking), status: :ok
-      end
+      render json: BookingSerializer.render(booking, root: :booking), status: :ok
     end
 
     # POST /bookings
@@ -35,11 +33,7 @@ module Api
 
     # PUT & PATCH /bookings/:id
     def update
-      booking = find_booking
-
-      if booking.nil?
-        render_error_not_found('booking')
-      elsif booking.update(booking_params)
+      if booking.update(booking_params)
         render json: BookingSerializer.render(booking, root: :booking), status: :ok
       else
         render_errors_bad_request(booking.errors)
@@ -48,11 +42,7 @@ module Api
 
     # DELETE /bookings/:id
     def destroy
-      booking = find_booking
-
-      if booking.nil?
-        render_error_not_found('booking')
-      elsif booking.destroy
+      if booking.destroy
         head :no_content
       else
         render_errors_bad_request(booking.errors)
@@ -62,7 +52,8 @@ module Api
     private
 
     def find_booking
-      Booking.where(id: params[:id]).first
+      @booking = Booking.where(id: params[:id]).first
+      render_error_not_found('booking') if @booking.nil?
     end
 
     def booking_params

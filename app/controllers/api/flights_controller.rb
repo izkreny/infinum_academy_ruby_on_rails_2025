@@ -1,5 +1,9 @@
 module Api
   class FlightsController < ApplicationController
+    attr_reader :flight
+
+    before_action :find_flight, only: [:show, :update, :destroy]
+
     # GET /flights
     def index
       flights = Flight.all
@@ -13,13 +17,7 @@ module Api
 
     # GET /flights/:id
     def show
-      flight = find_flight
-
-      if flight.nil?
-        render_error_not_found('flight')
-      else
-        render json: FlightSerializer.render(flight, root: :flight), status: :ok
-      end
+      render json: FlightSerializer.render(flight, root: :flight), status: :ok
     end
 
     # POST /flights
@@ -35,11 +33,7 @@ module Api
 
     # PUT & PATCH /flights/:id
     def update
-      flight = find_flight
-
-      if flight.nil?
-        render_error_not_found('flight')
-      elsif flight.update(flight_params)
+      if flight.update(flight_params)
         render json: FlightSerializer.render(flight, root: :flight), status: :ok
       else
         render_errors_bad_request(flight.errors)
@@ -48,11 +42,7 @@ module Api
 
     # DELETE /flights/:id
     def destroy
-      flight = find_flight
-
-      if flight.nil?
-        render_error_not_found('flight')
-      elsif flight.destroy
+      if flight.destroy
         head :no_content
       else
         render_errors_bad_request(flight.errors)
@@ -62,7 +52,8 @@ module Api
     private
 
     def find_flight
-      Flight.where(id: params[:id]).first
+      @flight = Flight.where(id: params[:id]).first
+      render_error_not_found('flight') if @flight.nil?
     end
 
     def flight_params

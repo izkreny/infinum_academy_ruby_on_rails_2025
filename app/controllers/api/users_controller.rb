@@ -1,5 +1,9 @@
 module Api
   class UsersController < ApplicationController
+    attr_reader :user
+
+    before_action :find_user, only: [:show, :update, :destroy]
+
     # GET /users
     def index
       users = User.all
@@ -13,13 +17,7 @@ module Api
 
     # GET /users/:id
     def show
-      user = find_user
-
-      if user.nil?
-        render_error_not_found('user')
-      else
-        render json: UserSerializer.render(user, root: :user), status: :ok
-      end
+      render json: UserSerializer.render(user, root: :user), status: :ok
     end
 
     # POST /users
@@ -35,11 +33,7 @@ module Api
 
     # PUT & PATCH /users/:id
     def update
-      user = find_user
-
-      if user.nil?
-        render_error_not_found('user')
-      elsif user.update(user_params)
+      if user.update(user_params)
         render json: UserSerializer.render(user, root: :user), status: :ok
       else
         render_errors_bad_request(user.errors)
@@ -48,11 +42,7 @@ module Api
 
     # DELETE /users/:id
     def destroy
-      user = find_user
-
-      if user.nil?
-        render_error_not_found('user')
-      elsif user.destroy
+      if user.destroy
         head :no_content
       else
         render_errors_bad_request(user.errors)
@@ -62,7 +52,8 @@ module Api
     private
 
     def find_user
-      User.where(id: params[:id]).first
+      @user = User.where(id: params[:id]).first
+      render_error_not_found('user') if @user.nil?
     end
 
     def user_params
