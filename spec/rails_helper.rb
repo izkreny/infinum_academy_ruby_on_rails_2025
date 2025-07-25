@@ -81,4 +81,4 @@ Shoulda::Matchers.configure do |config|
   end
 end
 
-Faker::Config.random = Random.new
+Faker::UniqueGenerator.clear
