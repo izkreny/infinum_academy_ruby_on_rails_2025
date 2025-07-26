@@ -1,7 +1,5 @@
 module Api
   class FlightsController < ApplicationController
-    attr_reader :flight
-
     before_action :find_flight, only: [:show, :update, :destroy]
 
     # GET /flights
@@ -51,9 +49,11 @@ module Api
 
     private
 
+    attr_reader :flight
+
     def find_flight
       @flight = Flight.where(id: params[:id]).first
-      render_error_not_found('flight') if @flight.nil?
+      render_error_not_found('flight') if flight.nil?
     end
 
     def flight_params

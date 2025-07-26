@@ -1,7 +1,5 @@
 module Api
   class BookingsController < ApplicationController
-    attr_reader :booking
-
     before_action :find_booking, only: [:show, :update, :destroy]
 
     # GET /bookings
@@ -51,9 +49,11 @@ module Api
 
     private
 
+    attr_reader :booking
+
     def find_booking
       @booking = Booking.where(id: params[:id]).first
-      render_error_not_found('booking') if @booking.nil?
+      render_error_not_found('booking') if booking.nil?
     end
 
     def booking_params
