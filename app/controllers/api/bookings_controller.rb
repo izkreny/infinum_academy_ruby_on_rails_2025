@@ -2,7 +2,7 @@ module Api
   class BookingsController < ApplicationController
     before_action :find_booking, only: [:show, :update, :destroy]
 
-    # GET /bookings
+    # GET /api/bookings
     def index
       bookings = Booking.all
 
@@ -13,12 +13,12 @@ module Api
       end
     end
 
-    # GET /bookings/:id
+    # GET /api/bookings/:id
     def show
       render json: BookingSerializer.render(booking, root: :booking), status: :ok
     end
 
-    # POST /bookings
+    # POST /api/bookings
     def create
       booking = Booking.new(booking_params)
 
@@ -29,7 +29,7 @@ module Api
       end
     end
 
-    # PUT & PATCH /bookings/:id
+    # PUT & PATCH /api/bookings/:id
     def update
       if booking.update(booking_params)
         render json: BookingSerializer.render(booking, root: :booking), status: :ok
@@ -38,7 +38,7 @@ module Api
       end
     end
 
-    # DELETE /bookings/:id
+    # DELETE /api/bookings/:id
     def destroy
       if booking.destroy
         head :no_content

@@ -2,7 +2,7 @@ module Api
   class UsersController < ApplicationController
     before_action :find_user, only: [:show, :update, :destroy]
 
-    # GET /users
+    # GET /api/users
     def index
       users = User.all
 
@@ -13,12 +13,12 @@ module Api
       end
     end
 
-    # GET /users/:id
+    # GET /api/users/:id
     def show
       render json: UserSerializer.render(user, root: :user), status: :ok
     end
 
-    # POST /users
+    # POST /api/users
     def create
       user = User.new(user_params)
 
@@ -29,7 +29,7 @@ module Api
       end
     end
 
-    # PUT & PATCH /users/:id
+    # PUT & PATCH /api/users/:id
     def update
       if user.update(user_params)
         render json: UserSerializer.render(user, root: :user), status: :ok
@@ -38,7 +38,7 @@ module Api
       end
     end
 
-    # DELETE /users/:id
+    # DELETE /api/users/:id
     def destroy
       if user.destroy
         head :no_content

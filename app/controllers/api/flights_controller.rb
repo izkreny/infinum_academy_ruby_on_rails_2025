@@ -2,7 +2,7 @@ module Api
   class FlightsController < ApplicationController
     before_action :find_flight, only: [:show, :update, :destroy]
 
-    # GET /flights
+    # GET /api/flights
     def index
       flights = Flight.all
 
@@ -13,12 +13,12 @@ module Api
       end
     end
 
-    # GET /flights/:id
+    # GET /api/flights/:id
     def show
       render json: FlightSerializer.render(flight, root: :flight), status: :ok
     end
 
-    # POST /flights
+    # POST /api/flights
     def create
       flight = Flight.new(flight_params)
 
@@ -29,7 +29,7 @@ module Api
       end
     end
 
-    # PUT & PATCH /flights/:id
+    # PUT & PATCH /api/flights/:id
     def update
       if flight.update(flight_params)
         render json: FlightSerializer.render(flight, root: :flight), status: :ok
@@ -38,7 +38,7 @@ module Api
       end
     end
 
-    # DELETE /flights/:id
+    # DELETE /api/flights/:id
     def destroy
       if flight.destroy
         head :no_content
