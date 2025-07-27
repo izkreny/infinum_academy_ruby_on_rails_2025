@@ -17,4 +17,6 @@ Rails.application.routes.draw do
     resources :bookings,  except: [:new, :edit]
     resources :companies, except: [:new, :edit]
   end
+
+  match '*route', to: redirect('/404.html', status: :not_found), via: :all
 end
