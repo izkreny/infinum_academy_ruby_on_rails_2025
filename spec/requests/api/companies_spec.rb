@@ -27,11 +27,11 @@ RSpec.describe 'Companies API', type: :request do
     let!(:existing_companies) { create_list(:company, 2) }
 
     context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not Found'" do
+      it "returns a status code 404 and an error message 'Not found!'" do
         get api_company_path(existing_companies.last.id + 1)
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not Found'
+        expect(response_body['errors']['company']).to eq 'Not found!'
       end
     end
 
@@ -50,15 +50,15 @@ RSpec.describe 'Companies API', type: :request do
       it 'returns a status code 400 and all error keys' do
         post api_companies_path
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
         post api_companies_path, params: {}
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
         post api_companies_path, params: { company: {} }
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
       end
     end
 
@@ -99,12 +99,12 @@ RSpec.describe 'Companies API', type: :request do
     let!(:existing_companies) { create_list(:company, 2) }
 
     context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not Found'" do
+      it "returns a status code 404 and an error message 'Not found!'" do
         put api_company_path(existing_companies.last.id + 1),
             params: { company: { random_word: random_word } }
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not Found'
+        expect(response_body['errors']['company']).to eq 'Not found!'
       end
     end
 
@@ -123,18 +123,18 @@ RSpec.describe 'Companies API', type: :request do
 
     context 'when :id parameter is valid but company param is missing or empty, ' \
             'or request params do not exist at all' do
-      it 'returns a status code 200 and unmodified company' do
+      it 'returns a status code 400 and unmodified company' do
         put api_company_path(existing_companies.first.id)
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
         put api_company_path(existing_companies.first.id), params: {}
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
         put api_company_path(existing_companies.first.id), params: { company: {} }
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
       end
     end
 
@@ -167,29 +167,29 @@ RSpec.describe 'Companies API', type: :request do
     let!(:existing_companies) { create_list(:company, 2) }
 
     context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not Found'" do
+      it "returns a status code 404 and an error message 'Not found!'" do
         patch api_company_path(existing_companies.last.id + 1),
               params: { company: { random_word: random_word } }
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not Found'
+        expect(response_body['errors']['company']).to eq 'Not found!'
       end
     end
 
     context 'when :id parameter is valid but company param is missing or empty, ' \
             'or request params do not exist at all' do
-      it 'returns a status code 200 and unmodified company' do
+      it 'returns a status code 400 and unmodified company' do
         patch api_company_path(existing_companies.first.id)
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
         patch api_company_path(existing_companies.first.id), params: {}
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
         patch api_company_path(existing_companies.first.id), params: { company: {} }
         expect(response).to have_http_status :bad_request
-        # expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body['errors']['company']).to eq 'Missing parameters.'
       end
     end
 
@@ -245,11 +245,11 @@ RSpec.describe 'Companies API', type: :request do
     let(:booking_count_after)   { Booking.count }
 
     context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not Found'" do
+      it "returns a status code 404 and an error message 'Not found!'" do
         delete api_company_path(existing_company.id + 1)
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not Found'
+        expect(response_body['errors']['company']).to eq 'Not found!'
       end
     end
 
