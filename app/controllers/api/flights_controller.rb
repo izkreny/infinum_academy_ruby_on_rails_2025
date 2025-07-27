@@ -57,7 +57,7 @@ module Api
     end
 
     def flight_params
-      return {} unless params.key?(:flight)
+      # return {} unless params.key?(:flight)
 
       params
         .require(:flight)

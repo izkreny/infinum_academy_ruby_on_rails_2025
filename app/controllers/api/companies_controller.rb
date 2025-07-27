@@ -57,7 +57,7 @@ module Api
     end
 
     def company_params
-      return {} unless params.key?(:company)
+      # return { name: nil } unless params.key?(:company)
 
       params.require(:company).permit(:name)
     end

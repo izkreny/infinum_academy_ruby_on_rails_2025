@@ -57,7 +57,7 @@ module Api
     end
 
     def user_params
-      return {} unless params.key?(:users)
+      # return {} unless params.key?(:users)
 
       params.require(:user).permit(:first_name, :last_name, :email)
     end
