@@ -53,10 +53,12 @@ module Api
 
     def find_booking
       @booking = Booking.where(id: params[:id]).first
-      render_error_not_found('booking') if booking.nil?
+      render_error_not_found(:booking) if booking.nil?
     end
 
     def booking_params
+      return {} unless params.key?(:booking)
+
       params.require(:booking).permit(:no_of_seats, :seat_price, :user_id, :flight_id)
     end
   end

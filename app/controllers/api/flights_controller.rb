@@ -53,10 +53,12 @@ module Api
 
     def find_flight
       @flight = Flight.where(id: params[:id]).first
-      render_error_not_found('flight') if flight.nil?
+      render_error_not_found(:flight) if flight.nil?
     end
 
     def flight_params
+      return {} unless params.key?(:flight)
+
       params
         .require(:flight)
         .permit(:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company_id)

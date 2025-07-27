@@ -53,10 +53,12 @@ module Api
 
     def find_company
       @company = Company.where(id: params[:id]).first
-      render_error_not_found('company') if company.nil?
+      render_error_not_found(:company) if company.nil?
     end
 
     def company_params
+      return {} unless params.key?(:company)
+
       params.require(:company).permit(:name)
     end
   end

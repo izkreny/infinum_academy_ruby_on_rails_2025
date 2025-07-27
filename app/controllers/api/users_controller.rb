@@ -53,10 +53,12 @@ module Api
 
     def find_user
       @user = User.where(id: params[:id]).first
-      render_error_not_found('user') if user.nil?
+      render_error_not_found(:user) if user.nil?
     end
 
     def user_params
+      return {} unless params.key?(:users)
+
       params.require(:user).permit(:first_name, :last_name, :email)
     end
   end
