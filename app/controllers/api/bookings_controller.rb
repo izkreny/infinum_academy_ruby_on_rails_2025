@@ -1,6 +1,7 @@
 module Api
   class BookingsController < ApplicationController
-    before_action :find_booking, only: [:show, :update, :destroy]
+    before_action :find_booking,   only: [:show, :update, :destroy]
+    before_action :booking_params, only: [:create, :update]
 
     # GET /api/bookings
     def index
@@ -53,13 +54,18 @@ module Api
 
     def find_booking
       @booking = Booking.where(id: params[:id]).first
-      render_error_not_found(:booking) if booking.nil?
+      render_errors_not_found(:booking) if booking.nil?
     end
 
     def booking_params
-      # return {} unless params.key?(:booking)
-
-      params.require(:booking).permit(:no_of_seats, :seat_price, :user_id, :flight_id)
+      if params.key?(:booking)
+        @booking_params ||=
+          params
+          .require(:booking)
+          .permit(:no_of_seats, :seat_price, :user_id, :flight_id)
+      else
+        render_errors_bad_request(:booking)
+      end
     end
   end
 end

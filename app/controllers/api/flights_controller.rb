@@ -1,6 +1,7 @@
 module Api
   class FlightsController < ApplicationController
-    before_action :find_flight, only: [:show, :update, :destroy]
+    before_action :find_flight,   only: [:show, :update, :destroy]
+    before_action :flight_params, only: [:create, :update]
 
     # GET /api/flights
     def index
@@ -53,15 +54,18 @@ module Api
 
     def find_flight
       @flight = Flight.where(id: params[:id]).first
-      render_error_not_found(:flight) if flight.nil?
+      render_errors_not_found(:flight) if flight.nil?
     end
 
     def flight_params
-      # return {} unless params.key?(:flight)
-
-      params
-        .require(:flight)
-        .permit(:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company_id)
+      if params.key?(:flight)
+        @flight_params ||=
+          params
+          .require(:flight)
+          .permit(:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company_id)
+      else
+        render_errors_bad_request(:flight)
+      end
     end
   end
 end

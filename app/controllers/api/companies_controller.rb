@@ -1,6 +1,7 @@
 module Api
   class CompaniesController < ApplicationController
-    before_action :find_company, only: [:show, :update, :destroy]
+    before_action :find_company,   only: [:show, :update, :destroy]
+    before_action :company_params, only: [:create, :update]
 
     # GET /api/companies
     def index
@@ -53,13 +54,15 @@ module Api
 
     def find_company
       @company = Company.where(id: params[:id]).first
-      render_error_not_found(:company) if company.nil?
+      render_errors_not_found(:company) if company.nil?
     end
 
     def company_params
-      # return { name: nil } unless params.key?(:company)
-
-      params.require(:company).permit(:name)
+      if params.key?(:company)
+        @company_params ||= params.require(:company).permit(:name)
+      else
+        render_errors_bad_request(:company)
+      end
     end
   end
 end

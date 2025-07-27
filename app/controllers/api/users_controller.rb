@@ -1,6 +1,7 @@
 module Api
   class UsersController < ApplicationController
-    before_action :find_user, only: [:show, :update, :destroy]
+    before_action :find_user,   only: [:show, :update, :destroy]
+    before_action :user_params, only: [:create, :update]
 
     # GET /api/users
     def index
@@ -53,13 +54,15 @@ module Api
 
     def find_user
       @user = User.where(id: params[:id]).first
-      render_error_not_found(:user) if user.nil?
+      render_errors_not_found(:user) if user.nil?
     end
 
     def user_params
-      # return {} unless params.key?(:users)
-
-      params.require(:user).permit(:first_name, :last_name, :email)
+      if params.key?(:user)
+        @user_params ||= params.require(:user).permit(:first_name, :last_name, :email)
+      else
+        render_errors_bad_request(:user)
+      end
     end
   end
 end
