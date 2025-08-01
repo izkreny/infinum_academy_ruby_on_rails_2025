@@ -26,7 +26,7 @@ module Api
       if user.save
         render json: UserSerializer.render(user, root: :user), status: :created
       else
-        render_errors_bad_request(user.errors)
+        render_errors_and_bad_request_status(user.errors)
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if user.update(user_params)
         render json: UserSerializer.render(user, root: :user), status: :ok
       else
-        render_errors_bad_request(user.errors)
+        render_errors_and_bad_request_status(user.errors)
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if user.destroy
         head :no_content
       else
-        render_errors_bad_request(user.errors)
+        render_errors_and_bad_request_status(user.errors)
       end
     end
 
@@ -54,14 +54,14 @@ module Api
 
     def find_user
       @user = User.where(id: params[:id]).first
-      render_errors_not_found(:user) if user.nil?
+      head :not_found if user.nil?
     end
 
     def user_params
       if params.key?(:user)
         @user_params ||= params.require(:user).permit(:first_name, :last_name, :email)
       else
-        render_errors_bad_request(:user)
+        head :bad_request
       end
     end
   end

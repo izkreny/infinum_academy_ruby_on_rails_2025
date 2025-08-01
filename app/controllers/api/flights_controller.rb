@@ -26,7 +26,7 @@ module Api
       if flight.save
         render json: FlightSerializer.render(flight, root: :flight), status: :created
       else
-        render_errors_bad_request(flight.errors)
+        render_errors_and_bad_request_status(flight.errors)
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if flight.update(flight_params)
         render json: FlightSerializer.render(flight, root: :flight), status: :ok
       else
-        render_errors_bad_request(flight.errors)
+        render_errors_and_bad_request_status(flight.errors)
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if flight.destroy
         head :no_content
       else
-        render_errors_bad_request(flight.errors)
+        render_errors_and_bad_request_status(flight.errors)
       end
     end
 
@@ -54,7 +54,7 @@ module Api
 
     def find_flight
       @flight = Flight.where(id: params[:id]).first
-      render_errors_not_found(:flight) if flight.nil?
+      head :not_found if flight.nil?
     end
 
     def flight_params
@@ -64,7 +64,7 @@ module Api
           .require(:flight)
           .permit(:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company_id)
       else
-        render_errors_bad_request(:flight)
+        head :bad_request
       end
     end
   end

@@ -4,15 +4,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   skip_before_action :verify_authenticity_token
 
-  def render_errors_not_found(object)
-    render json: { errors: { object => 'Not found!' } }, status: :not_found
-  end
-
-  def render_errors_bad_request(object)
-    if object.is_a?(Symbol)
-      render json: { errors: { object => 'Missing parameters.' } }, status: :bad_request
-    else
-      render json: { errors: object }, status: :bad_request
-    end
+  def render_errors_and_bad_request_status(errors)
+    render json: { errors: errors }, status: :bad_request
   end
 end

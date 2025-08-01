@@ -26,7 +26,7 @@ module Api
       if company.save
         render json: CompanySerializer.render(company, root: :company), status: :created
       else
-        render_errors_bad_request(company.errors)
+        render_errors_and_bad_request_status(company.errors)
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if company.update(company_params)
         render json: CompanySerializer.render(company, root: :company), status: :ok
       else
-        render_errors_bad_request(company.errors)
+        render_errors_and_bad_request_status(company.errors)
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if company.destroy
         head :no_content
       else
-        render_errors_bad_request(company.errors)
+        render_errors_and_bad_request_status(company.errors)
       end
     end
 
@@ -54,14 +54,14 @@ module Api
 
     def find_company
       @company = Company.where(id: params[:id]).first
-      render_errors_not_found(:company) if company.nil?
+      head :not_found if company.nil?
     end
 
     def company_params
       if params.key?(:company)
         @company_params ||= params.require(:company).permit(:name)
       else
-        render_errors_bad_request(:company)
+        head :bad_request
       end
     end
   end

@@ -26,7 +26,7 @@ module Api
       if booking.save
         render json: BookingSerializer.render(booking, root: :booking), status: :created
       else
-        render_errors_bad_request(booking.errors)
+        render_errors_and_bad_request_status(booking.errors)
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if booking.update(booking_params)
         render json: BookingSerializer.render(booking, root: :booking), status: :ok
       else
-        render_errors_bad_request(booking.errors)
+        render_errors_and_bad_request_status(booking.errors)
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if booking.destroy
         head :no_content
       else
-        render_errors_bad_request(booking.errors)
+        render_errors_and_bad_request_status(booking.errors)
       end
     end
 
@@ -54,7 +54,7 @@ module Api
 
     def find_booking
       @booking = Booking.where(id: params[:id]).first
-      render_errors_not_found(:booking) if booking.nil?
+      head :not_found if booking.nil?
     end
 
     def booking_params
@@ -64,7 +64,7 @@ module Api
           .require(:booking)
           .permit(:no_of_seats, :seat_price, :user_id, :flight_id)
       else
-        render_errors_bad_request(:booking)
+        head :bad_request
       end
     end
   end
