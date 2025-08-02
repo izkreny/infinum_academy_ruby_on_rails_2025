@@ -8,6 +8,18 @@ class ApplicationController < ActionController::Base
     render json: { errors: errors }, status: :bad_request
   end
 
+  def find_object
+    model_name =
+      self.class.name
+          .delete_prefix('Api::')
+          .delete_suffix('Controller')
+          .singularize.downcase
+    eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
+      @#{model_name} = #{model_name.capitalize}.where(id: params[:id]).first
+      head :not_found if #{model_name}.nil?
+    RUBY
+  end
+
   # Why, o why this only does NOT work inside the #create Controller method?!?
   #   Failure/Error: eval "render json: { errors: #{model_name}.errors }, status: :bad_request"
   #   NoMethodError: undefined method 'errors' for nil

@@ -1,6 +1,6 @@
 module Api
   class UsersController < ApplicationController
-    before_action :find_user,   only: [:show, :update, :destroy]
+    before_action :find_object, only: [:show, :update, :destroy]
     before_action :user_params, only: [:create, :update]
 
     # GET /api/users
@@ -51,11 +51,6 @@ module Api
     private
 
     attr_reader :user
-
-    def find_user
-      @user = User.where(id: params[:id]).first
-      head :not_found if user.nil?
-    end
 
     def user_params
       if params.key?(:user)

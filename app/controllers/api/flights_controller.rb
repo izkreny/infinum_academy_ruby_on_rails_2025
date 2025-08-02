@@ -1,6 +1,6 @@
 module Api
   class FlightsController < ApplicationController
-    before_action :find_flight,   only: [:show, :update, :destroy]
+    before_action :find_object,   only: [:show, :update, :destroy]
     before_action :flight_params, only: [:create, :update]
 
     # GET /api/flights
@@ -51,11 +51,6 @@ module Api
     private
 
     attr_reader :flight
-
-    def find_flight
-      @flight = Flight.where(id: params[:id]).first
-      head :not_found if flight.nil?
-    end
 
     def flight_params
       if params.key?(:flight)

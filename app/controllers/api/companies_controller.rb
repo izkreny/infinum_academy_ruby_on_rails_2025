@@ -1,6 +1,6 @@
 module Api
   class CompaniesController < ApplicationController
-    before_action :find_company,   only: [:show, :update, :destroy]
+    before_action :find_object,    only: [:show, :update, :destroy]
     before_action :company_params, only: [:create, :update]
 
     # GET /api/companies
@@ -51,11 +51,6 @@ module Api
     private
 
     attr_reader :company
-
-    def find_company
-      @company = Company.where(id: params[:id]).first
-      head :not_found if company.nil?
-    end
 
     def company_params
       if params.key?(:company)
