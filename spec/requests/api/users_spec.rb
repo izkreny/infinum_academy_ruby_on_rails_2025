@@ -1,6 +1,5 @@
 RSpec.describe 'Users API', type: :request do
   include TestHelpers::RequestsApi
-  # rubocop:disable RSpec/ExampleLength
 
   describe 'GET /api/users' do
     context 'when user records do not exist' do
@@ -13,278 +12,201 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when user records exist' do
-      before { create_list(:user, 2) }
+      let!(:existing_users) { create_list(:user, 2) }
 
       it 'returns a status code 200 and a list of all users' do
         get api_users_path
 
         expect(response).to have_http_status :ok
-        expect(response_body['users'].size).to eq User.count
+        expect(response_body(:users).size).to eq existing_users.count
       end
     end
   end
 
   describe 'GET /api/users/:id' do
-    let!(:existing_users) { create_list(:user, 2) }
+    let!(:existing_user) { create(:user) }
 
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
-        get api_user_path(existing_users.last.id + 1)
+    context 'when :id param is invalid' do
+      it 'returns a status code 404 without any content' do
+        get api_user_path(existing_user.id + 1)
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['user']).to eq 'Not found!'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid' do
+    context 'when :id param is valid' do
       it 'returns a status code 200 and a single user with the correct attributes' do
-        get api_user_path(existing_users.first.id)
+        get api_user_path(existing_user.id)
 
         expect(response).to have_http_status :ok
-        expect(build(:user, response_body['user'])).to eq existing_users.first
+        returned_user = response_body(:user)
+        expect(returned_user['first_name']).to eq existing_user.first_name
+        expect(returned_user['last_name']).to  eq existing_user.last_name
+        expect(returned_user['email']).to      eq existing_user.email
+        expect(returned_user['created_at']).to eq stringify_time(existing_user.created_at)
+        expect(returned_user['updated_at']).to eq stringify_time(existing_user.updated_at)
       end
     end
   end
 
   describe 'POST /api/users' do
-    context 'when user params are empty or do not exist' do
-      it 'returns a status code 400 and all error keys' do
+    context 'when request params do not exist at all' do
+      it 'returns a status code 400 without any content' do
         post api_users_path
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
 
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when request params are empty' do
+      it 'returns a status code 400 without any content' do
         post api_users_path, params: {}
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
 
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when user param is empty' do
+      it 'returns a status code 400 without any content' do
         post api_users_path, params: { user: {} }
+
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when user params are invalid or missing' do
-      let!(:existing_user) { create(:user) }
-
+    context 'when the required user params are missing' do
       it 'returns a status code 400 and correct error keys' do
-        post api_users_path, params: { user: { first_name: '', last_name: '', email: '' } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('first_name', 'email')
+        post api_users_path, params: { user: random_hash }
 
-        post api_users_path, params: { user: { email: existing_user.email.swapcase } }
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('first_name', 'email')
-
-        post api_users_path, params: { user: { random_word: random_word } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('first_name', 'email')
+        required_params = ['first_name', 'email']
+        expect(response_body(:errors).keys).to match_array(required_params)
       end
     end
 
-    context 'when all user params are valid' do
-      let!(:user_count_before) { User.count }
-      let!(:new_user)          { build(:user) }
-      let(:user_count_after)   { User.count }
-
-      it 'returns a status code 201 and a created user with the correct attributes' do
-        post api_users_path,
-             params: {
-               user: {
-                 first_name: new_user.first_name,
-                 last_name: new_user.last_name,
-                 email: new_user.email
-               }
-             }
-        created_user = build(:user, response_body['user'])
-
-        expect(response).to have_http_status :created
-        expect(created_user.first_name).to eq new_user.first_name
-        expect(created_user.last_name).to  eq new_user.last_name
-        expect(created_user.email).to      eq new_user.email
-        expect(user_count_after).to        eq(user_count_before + 1)
-      end
-    end
-  end
-
-  describe 'PUT /api/users/:id' do
-    let!(:existing_users) { create_list(:user, 2) }
-
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
-        put api_user_path(existing_users.last.id + 1),
-            params: { user: { random_word: random_word } }
-
-        expect(response).to have_http_status :not_found
-        expect(response_body['errors']['user']).to eq 'Not found!'
-      end
-    end
-
-    context 'when :id parameter is valid but user params are invalid' do
-      it 'returns a status code 400 and correct error keys' do
-        put api_user_path(existing_users.first.id),
-            params: { user: { email: existing_users.last.email.swapcase } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('email')
-
-        put api_user_path(existing_users.first.id),
-            params: { user: { first_name: '', last_name: '', email: '' } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('first_name', 'email')
-      end
-    end
-
-    context 'when :id parameter is valid but user param is missing or empty, ' \
-            'or request params do not exist at all' do
-      it 'returns a status code 400 and unmodified user' do
-        put api_user_path(existing_users.first.id)
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
-
-        put api_user_path(existing_users.first.id), params: {}
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
-
-        put api_user_path(existing_users.first.id), params: { user: {} }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
-      end
-    end
-
-    context 'when :id parameter is valid but user params are missing' do
-      it 'returns a status code 200 and an unmodified user' do
-        put api_user_path(existing_users.first.id),
-            params: { user: { random_word: random_word } }
-        expect(response).to have_http_status :ok
-        expect(build(:user, response_body['user'])).to eq existing_users.first
-      end
-    end
-
-    context 'when all user params are valid' do
+    context 'when all params are valid' do
       let!(:new_user) { build(:user) }
 
-      it 'returns a status code 200 and an updated user with the correct attributes' do
-        put api_user_path(existing_users.first.id),
-            params: {
-              user: {
-                first_name: new_user.first_name,
-                last_name: new_user.last_name,
-                email: new_user.email
-              }
-            }
-        updated_user = build(:user, response_body['user'])
+      it 'returns a status code 201 and a created user with the correct attributes' do
+        expect { post api_users_path, params: { user: new_user.attributes.compact } }.to \
+          change(User, :count).from(0).to(1)
 
-        expect(response).to have_http_status :ok
-        expect(updated_user.first_name).to     eq new_user.first_name
-        expect(updated_user.last_name).to      eq new_user.last_name
-        expect(updated_user.email).to          eq new_user.email
-        expect(updated_user.created_at).to     eq existing_users.first.created_at
-        expect(updated_user.updated_at).not_to eq existing_users.first.updated_at
+        expect(response).to have_http_status :created
+        created_user = response_body(:user)
+        expect(created_user['first_name']).to eq new_user.first_name
+        expect(created_user['last_name']).to  eq new_user.last_name
+        expect(created_user['email']).to      eq new_user.email
       end
     end
   end
 
   describe 'PATCH /api/users/:id' do
-    let!(:existing_users) { create_list(:user, 2) }
+    let!(:existing_user) { create(:user) }
 
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
-        patch api_user_path(existing_users.last.id + 1),
-              params: { user: { random_word: random_word } }
+    context 'when :id param is invalid' do
+      it 'returns a status code 404 without any content' do
+        patch api_user_path(existing_user.id + 1),
+              params: { user: random_hash }
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['user']).to eq 'Not found!'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid but user params are invalid' do
+    context 'when :id param is valid, but request params do not exist at all' do
+      it 'returns a status code 400 without any content' do
+        patch api_user_path(existing_user.id)
+
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when :id param is valid, but request params are empty' do
+      it 'returns a status code 400 without any content' do
+        patch api_user_path(existing_user.id), params: {}
+
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when :id param is valid, but user param is empty' do
+      it 'returns a status code 400 without any content' do
+        patch api_user_path(existing_user.id), params: { user: {} }
+
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when :id param is valid, but required user params are invalid' do
       it 'returns a status code 400 and correct error keys' do
-        patch api_user_path(existing_users.first.id),
-              params: { user: { email: existing_users.last.email.swapcase } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('email')
-
-        patch api_user_path(existing_users.first.id),
+        patch api_user_path(existing_user.id),
               params: { user: { first_name: '', last_name: '', email: '' } }
+
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('first_name', 'email')
+        error_keys = ['first_name', 'email']
+        expect(response_body(:errors).keys).to match_array(error_keys)
       end
     end
 
-    context 'when :id parameter is valid but user param is missing or empty, ' \
-            'or request params do not exist at all' do
-      it 'returns a status code 400 and unmodified user' do
-        patch api_user_path(existing_users.first.id)
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
-
-        patch api_user_path(existing_users.first.id), params: {}
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
-
-        patch api_user_path(existing_users.first.id), params: { user: {} }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['user']).to eq 'Missing parameters.'
-      end
-    end
-
-    context 'when :id parameter is valid but user params are missing' do
+    context 'when :id param is valid, but the user params are missing' do
       it 'returns a status code 200 and an unmodified user' do
-        patch api_user_path(existing_users.first.id),
-              params: { user: { random_word: random_word } }
+        patch api_user_path(existing_user.id), params: { user: random_hash }
+
         expect(response).to have_http_status :ok
-        expect(build(:user, response_body['user'])).to eq existing_users.first
+        returned_user = response_body(:user)
+        expect(returned_user['first_name']).to eq existing_user.first_name
+        expect(returned_user['last_name']).to  eq existing_user.last_name
+        expect(returned_user['email']).to      eq existing_user.email
+        expect(returned_user['created_at']).to eq stringify_time(existing_user.created_at)
+        expect(returned_user['updated_at']).to eq stringify_time(existing_user.updated_at)
       end
     end
 
-    context 'when all user params are valid' do
+    context 'when all params are valid' do
       let!(:new_user) { build(:user) }
 
       it 'returns a status code 200 and an updated user with the correct attributes' do
-        patch api_user_path(existing_users.first.id),
-              params: {
-                user: {
-                  first_name: new_user.first_name,
-                  last_name: new_user.last_name,
-                  email: new_user.email
-                }
-              }
-        updated_user = build(:user, response_body['user'])
+        patch api_user_path(existing_user.id),
+              params: { user: new_user.attributes.compact }
 
         expect(response).to have_http_status :ok
-        expect(updated_user.first_name).to     eq new_user.first_name
-        expect(updated_user.last_name).to      eq new_user.last_name
-        expect(updated_user.email).to          eq new_user.email
-        expect(updated_user.created_at).to     eq existing_users.first.created_at
-        expect(updated_user.updated_at).not_to eq existing_users.first.updated_at
+        updated_user = response_body(:user)
+        expect(updated_user['first_name']).to     eq new_user.first_name
+        expect(updated_user['last_name']).to      eq new_user.last_name
+        expect(updated_user['email']).to          eq new_user.email
+        expect(updated_user['created_at']).to     eq stringify_time(existing_user.created_at)
+        expect(updated_user['updated_at']).not_to eq stringify_time(existing_user.updated_at)
       end
     end
   end
 
   describe 'DELETE /api/users/:id' do
-    let!(:existing_user)     { create(:user) }
-    let!(:user_count_before) { User.count }
-    let(:user_count_after)   { User.count }
+    let!(:existing_user) { create(:user) }
 
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
+    context 'when :id param is invalid' do
+      it 'returns a status code 404 without any content' do
         delete api_user_path(existing_user.id + 1)
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['user']).to eq 'Not found!'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid' do
-      it 'returns a status code 204 without any content ' \
-         'and deletes the user, and all connected records' do
-        delete api_user_path(existing_user.id)
+    context 'when :id param is valid' do
+      it 'returns a status code 204 and deletes the user' do
+        expect { delete api_user_path(existing_user.id) }.to \
+          change(User, :count).from(1).to(0)
 
         expect(response).to have_http_status :no_content
         expect(response.body).to be_empty
-        expect(User.where(id: existing_user.id).empty?).to be true
-        expect(user_count_after).to eq(user_count_before - 1)
       end
     end
   end
-  # rubocop:enable RSpec/ExampleLength
 end

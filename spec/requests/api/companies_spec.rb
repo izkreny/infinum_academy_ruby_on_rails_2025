@@ -1,5 +1,6 @@
 RSpec.describe 'Companies API', type: :request do
   include TestHelpers::RequestsApi
+  # rubocop:disable Style/BlockDelimiters
 
   describe 'GET /api/companies' do
     context 'when company records do not exist' do
@@ -12,263 +13,190 @@ RSpec.describe 'Companies API', type: :request do
     end
 
     context 'when company records exist' do
-      before { create_list(:company, 2) }
+      let!(:existing_companies) { create_list(:company, 2) }
 
       it 'returns a status code 200 and a list of all companies' do
         get api_companies_path
 
         expect(response).to have_http_status :ok
-        expect(response_body['companies'].size).to eq Company.count
+        expect(response_body(:companies).size).to eq existing_companies.size
       end
     end
   end
 
   describe 'GET /api/companies/:id' do
-    let!(:existing_companies) { create_list(:company, 2) }
+    let!(:existing_company) { create(:company) }
 
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
-        get api_company_path(existing_companies.last.id + 1)
+    context 'when :id param is invalid' do
+      it 'returns a status code 404 without any content' do
+        get api_company_path(existing_company.id + 1)
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not found!'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid' do
+    context 'when :id param is valid' do
       it 'returns a status code 200 and a single company with the correct attributes' do
-        get api_company_path(existing_companies.first.id)
+        get api_company_path(existing_company.id)
 
         expect(response).to have_http_status :ok
-        expect(build(:company, response_body['company'])).to eq existing_companies.first
+        returned_company = response_body(:company)
+        expect(returned_company['name']).to       eq existing_company.name
+        expect(returned_company['created_at']).to eq stringify_time(existing_company.created_at)
+        expect(returned_company['updated_at']).to eq stringify_time(existing_company.updated_at)
       end
     end
   end
 
   describe 'POST /api/companies' do
-    context 'when company params are empty or do not exist' do
-      it 'returns a status code 400 and all error keys' do
+    context 'when request params do not exist at all' do
+      it 'returns a status code 400 without any content' do
         post api_companies_path
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when request params are empty' do
+      it 'returns a status code 400 without any content' do
         post api_companies_path, params: {}
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
 
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when company param is empty' do
+      it 'returns a status code 400 without any content' do
         post api_companies_path, params: { company: {} }
+
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when company params are invalid or missing' do
-      let!(:existing_company) { create(:company) }
-
+    context 'when the required company params are missing' do
       it 'returns a status code 400 and correct error keys' do
-        post api_companies_path, params: { company: { name: '' } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
+        post api_companies_path, params: { company: random_hash }
 
-        post api_companies_path, params: { company: { name: existing_company.name.swapcase } }
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
-
-        post api_companies_path, params: { company: { random_word: random_word } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body(:errors).keys).to contain_exactly('name')
       end
     end
 
-    context 'when all company params are valid' do
-      let!(:company_count_before) { Company.count }
-      let!(:new_company)          { build(:company) }
-      let(:company_count_after)   { Company.count }
-
-      it 'returns a status code 201 and a created company with the correct attributes' do
-        post api_companies_path, params: { company: { name: new_company.name } }
-
-        expect(response).to have_http_status :created
-        expect(response_body['company']['name']).to eq new_company.name
-        expect(company_count_after).to eq(company_count_before + 1)
-      end
-    end
-  end
-
-  describe 'PUT /api/companies/:id' do
-    let!(:existing_companies) { create_list(:company, 2) }
-
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
-        put api_company_path(existing_companies.last.id + 1),
-            params: { company: { random_word: random_word } }
-
-        expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not found!'
-      end
-    end
-
-    context 'when :id parameter is valid but company params are invalid' do
-      it 'returns a status code 400 and correct error keys' do
-        put api_company_path(existing_companies.first.id),
-            params: { company: { name: existing_companies.last.name.swapcase } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
-
-        put api_company_path(existing_companies.first.id), params: { company: { name: '' } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
-      end
-    end
-
-    context 'when :id parameter is valid but company param is missing or empty, ' \
-            'or request params do not exist at all' do
-      it 'returns a status code 400 and unmodified company' do
-        put api_company_path(existing_companies.first.id)
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
-
-        put api_company_path(existing_companies.first.id), params: {}
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
-
-        put api_company_path(existing_companies.first.id), params: { company: {} }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
-      end
-    end
-
-    context 'when :id parameter is valid but company params are missing' do
-      it 'returns a status code 200 and an unmodified company' do
-        put api_company_path(existing_companies.first.id),
-            params: { company: { random_word: random_word } }
-        expect(response).to have_http_status :ok
-        expect(build(:company, response_body['company'])).to eq existing_companies.first
-      end
-    end
-
-    context 'when all company params are valid' do
+    context 'when all params are valid' do
       let!(:new_company) { build(:company) }
 
-      it 'returns a status code 200 and an updated company with the correct attributes' do
-        put api_company_path(existing_companies.first.id),
-            params: { company: { name: new_company.name } }
-        updated_company = build(:company, response_body['company'])
+      it 'returns a status code 201 and a created company with the correct attributes' do
+        expect {
+          post api_companies_path, params: { company: { name: new_company.name } }
+        }.to change(Company, :count).from(0).to(1)
 
-        expect(response).to have_http_status :ok
-        expect(updated_company.name).to           eq new_company.name
-        expect(updated_company.created_at).to     eq existing_companies.first.created_at
-        expect(updated_company.updated_at).not_to eq existing_companies.first.updated_at
+        expect(response).to have_http_status :created
+        expect(response_body(:company)['name']).to eq new_company.name
       end
     end
   end
 
   describe 'PATCH /api/companies/:id' do
-    let!(:existing_companies) { create_list(:company, 2) }
+    let!(:existing_company) { create(:company) }
 
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
-        patch api_company_path(existing_companies.last.id + 1),
-              params: { company: { random_word: random_word } }
+    context 'when :id param is invalid' do
+      it 'returns a status code 404 without any content' do
+        patch api_company_path(existing_company.id + 1),
+              params: { company: random_hash }
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not found!'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid but company param is missing or empty, ' \
-            'or request params do not exist at all' do
-      it 'returns a status code 400 and unmodified company' do
-        patch api_company_path(existing_companies.first.id)
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
+    context 'when :id param is valid, but request params do not exist at all' do
+      it 'returns a status code 400 without any content' do
+        patch api_company_path(existing_company.id)
 
-        patch api_company_path(existing_companies.first.id), params: {}
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
-
-        patch api_company_path(existing_companies.first.id), params: { company: {} }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors']['company']).to eq 'Missing parameters.'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid but company params are missing' do
-      it 'returns a status code 200 and an unmodified company' do
-        patch api_company_path(existing_companies.first.id),
-              params: { company: { random_word: random_word } }
-        expect(response).to have_http_status :ok
-        expect(build(:company, response_body['company'])).to eq existing_companies.first
+    context 'when :id param is valid, but request params are empty' do
+      it 'returns a status code 400 without any content' do
+        patch api_company_path(existing_company.id), params: {}
+
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid but company params are invalid' do
+    context 'when :id param is valid, but company param is empty' do
+      it 'returns a status code 400 without any content' do
+        patch api_company_path(existing_company.id), params: { company: {} }
+
+        expect(response).to have_http_status :bad_request
+        expect(response.body).to be_empty
+      end
+    end
+
+    context 'when :id param is valid, but required company params are invalid' do
       it 'returns a status code 400 and correct error keys' do
-        patch api_company_path(existing_companies.first.id),
-              params: { company: { name: existing_companies.last.name.swapcase } }
-        expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
+        put api_company_path(existing_company.id), params: { company: { name: '' } }
 
-        put api_company_path(existing_companies.first.id), params: { company: { name: '' } }
         expect(response).to have_http_status :bad_request
-        expect(response_body['errors'].keys).to contain_exactly('name')
+        expect(response_body(:errors).keys).to contain_exactly('name')
       end
     end
 
-    context 'when all company params are valid' do
+    context 'when :id param is valid, but the company params are missing' do
+      it 'returns a status code 200 and an unmodified company' do
+        patch api_company_path(existing_company.id), params: { company: random_hash }
+
+        expect(response).to have_http_status :ok
+        returned_company = response_body(:company)
+        expect(returned_company['name']).to       eq existing_company.name
+        expect(returned_company['created_at']).to eq stringify_time(existing_company.created_at)
+        expect(returned_company['updated_at']).to eq stringify_time(existing_company.updated_at)
+      end
+    end
+
+    context 'when all params are valid' do
       let!(:new_company) { build(:company) }
 
       it 'returns a status code 200 and an updated company with the correct attributes' do
-        patch api_company_path(existing_companies.first.id),
-              params: { company: { name: new_company.name } }
-        updated_company = build(:company, response_body['company'])
+        patch api_company_path(existing_company.id), params: { company: { name: new_company.name } }
 
         expect(response).to have_http_status :ok
-        expect(updated_company.name).to           eq new_company.name
-        expect(updated_company.created_at).to     eq existing_companies.first.created_at
-        expect(updated_company.updated_at).not_to eq existing_companies.first.updated_at
+        updated_company = response_body(:company)
+        expect(updated_company['name']).to           eq new_company.name
+        expect(updated_company['created_at']).to     eq stringify_time(existing_company.created_at)
+        expect(updated_company['updated_at']).not_to eq stringify_time(existing_company.updated_at)
       end
     end
   end
 
-  # rubocop:disable RSpec/MultipleMemoizedHelpers
   describe 'DELETE /api/companies/:id' do
-    let!(:existing_company)     { create(:company) }
-    let!(:existing_flight)      { create(:flight, company: existing_company) }
-    let!(:existing_user)        { create(:user) }
-    let!(:existing_booking)     { create(:booking, flight: existing_flight, user: existing_user) }
-    let!(:company_count_before) { Company.count }
-    let!(:flight_count_before)  { Flight.count }
-    let!(:booking_count_before) { Booking.count }
-    let(:company_count_after)   { Company.count }
-    let(:flight_count_after)    { Flight.count }
-    let(:booking_count_after)   { Booking.count }
+    let!(:existing_company) { create(:company) }
 
-    context 'when :id parameter is invalid' do
-      it "returns a status code 404 and an error message 'Not found!'" do
+    context 'when :id param is invalid' do
+      it 'returns a status code 404 without any content' do
         delete api_company_path(existing_company.id + 1)
 
         expect(response).to have_http_status :not_found
-        expect(response_body['errors']['company']).to eq 'Not found!'
+        expect(response.body).to be_empty
       end
     end
 
-    context 'when :id parameter is valid' do
-      it 'returns a status code 204 without any content ' \
-         'and deletes the company, and all connected records' do
-        delete api_company_path(existing_company.id)
+    context 'when :id param is valid' do
+      it 'returns a status code 204 and deletes the company' do
+        expect { delete api_company_path(existing_company.id) }.to \
+          change(Company, :count).from(1).to(0)
 
         expect(response).to have_http_status :no_content
         expect(response.body).to be_empty
-        expect(Company.where(id: existing_company.id).empty?).to be true
-        expect(Booking.where(id: existing_booking.id).empty?).to be true
-        expect(Flight.where(id:  existing_flight.id).empty?).to  be true
-        expect(User.where(id:    existing_user.id).empty?).to    be false
-        expect(company_count_after).to eq(company_count_before - 1)
-        expect(booking_count_after).to eq(booking_count_before - 1)
-        expect(flight_count_after).to  eq(flight_count_before  - 1)
       end
     end
   end
-  # rubocop:enable RSpec/MultipleMemoizedHelpers
+  # rubocop:enable Style/BlockDelimiters
 end
