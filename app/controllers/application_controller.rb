@@ -7,4 +7,18 @@ class ApplicationController < ActionController::Base
   def render_errors_and_bad_request_status(errors)
     render json: { errors: errors }, status: :bad_request
   end
+
+  # Why, o why this only does NOT work inside the #create Controller method?!?
+  #   Failure/Error: eval "render json: { errors: #{model_name}.errors }, status: :bad_request"
+  #   NoMethodError: undefined method 'errors' for nil
+  # def render_errors_and_bad_request_status
+  #   model_name =
+  #     self.class.name
+  #         .delete_prefix('Api::')
+  #         .delete_suffix('Controller')
+  #         .singularize.downcase
+  #   eval <<-RUBY, binding, __FILE__, __LINE__ + 1
+  #     render json: { errors: #{model_name}.errors }, status: :bad_request
+  #   RUBY
+  # end
 end
