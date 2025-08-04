@@ -37,19 +37,20 @@ RSpec.describe 'Flights API', type: :request do
     end
 
     context 'when :id param is valid' do
+      let(:returned_flight) { response_body(:flight) }
+
       it 'returns a status code 200 and a single flight with the correct attributes' do
         get api_flight_path(existing_flight.id)
 
         expect(response).to have_http_status :ok
-        returned_flight = response_body(:flight)
-        expect(returned_flight['name']).to          eq existing_flight.name
-        expect(returned_flight['no_of_seats']).to   eq existing_flight.no_of_seats
-        expect(returned_flight['base_price']).to    eq existing_flight.base_price
-        expect(returned_flight['departs_at']).to    eq stringify_time(existing_flight.departs_at)
-        expect(returned_flight['arrives_at']).to    eq stringify_time(existing_flight.arrives_at)
-        expect(returned_flight['created_at']).to    eq stringify_time(existing_flight.created_at)
-        expect(returned_flight['updated_at']).to    eq stringify_time(existing_flight.updated_at)
-        expect(returned_flight['company']['id']).to eq existing_flight.company_id
+        expect(returned_flight[:name]).to         eq existing_flight.name
+        expect(returned_flight[:no_of_seats]).to  eq existing_flight.no_of_seats
+        expect(returned_flight[:base_price]).to   eq existing_flight.base_price
+        expect(returned_flight[:departs_at]).to   eq stringify_time(existing_flight.departs_at)
+        expect(returned_flight[:arrives_at]).to   eq stringify_time(existing_flight.arrives_at)
+        expect(returned_flight[:created_at]).to   eq stringify_time(existing_flight.created_at)
+        expect(returned_flight[:updated_at]).to   eq stringify_time(existing_flight.updated_at)
+        expect(returned_flight[:company][:id]).to eq existing_flight.company_id
       end
     end
   end
@@ -83,11 +84,13 @@ RSpec.describe 'Flights API', type: :request do
     end
 
     context 'when the required flight params are missing' do
+      let(:required_params) {
+        [:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company]
+      }
+
       it 'returns a status code 400 and correct error keys' do
         post api_flights_path, params: { flight: random_hash }
 
-        required_params = ['name', 'no_of_seats', 'base_price',
-                           'departs_at', 'arrives_at', 'company']
         expect(response).to have_http_status :bad_request
         expect(response_body(:errors).keys).to match_array(required_params)
       end
@@ -96,21 +99,21 @@ RSpec.describe 'Flights API', type: :request do
     context 'when all params are valid' do
       let!(:existing_company) { create(:company) }
       let!(:new_flight) { build(:flight, company_id: existing_company.id) }
+      let(:created_flight) { response_body(:flight) }
 
       it 'returns a status code 201 and a created flight with the correct attributes' do
         expect {
           post api_flights_path,
-               params: { flight: stringify_time_values(new_flight.attributes) }
+               params: { flight: stringify_time_values(new_flight.attributes.compact) }
         }.to change(Flight, :count).from(0).to(1)
 
         expect(response).to have_http_status :created
-        created_flight = response_body(:flight)
-        expect(created_flight['name']).to          eq new_flight.name
-        expect(created_flight['no_of_seats']).to   eq new_flight.no_of_seats
-        expect(created_flight['base_price']).to    eq new_flight.base_price
-        expect(created_flight['departs_at']).to    eq stringify_time(new_flight.departs_at)
-        expect(created_flight['arrives_at']).to    eq stringify_time(new_flight.arrives_at)
-        expect(created_flight['company']['id']).to eq new_flight.company_id
+        expect(created_flight[:name]).to         eq new_flight.name
+        expect(created_flight[:no_of_seats]).to  eq new_flight.no_of_seats
+        expect(created_flight[:base_price]).to   eq new_flight.base_price
+        expect(created_flight[:departs_at]).to   eq stringify_time(new_flight.departs_at)
+        expect(created_flight[:arrives_at]).to   eq stringify_time(new_flight.arrives_at)
+        expect(created_flight[:company][:id]).to eq new_flight.company_id
       end
     end
   end
@@ -120,8 +123,7 @@ RSpec.describe 'Flights API', type: :request do
 
     context 'when :id param is invalid' do
       it 'returns a status code 404 without any content' do
-        patch api_flight_path(existing_flight.id + 1),
-              params: { flight: random_hash }
+        patch api_flight_path(existing_flight.id + 1), params: { flight: random_hash }
 
         expect(response).to have_http_status :not_found
         expect(response.body).to be_empty
@@ -156,56 +158,60 @@ RSpec.describe 'Flights API', type: :request do
     end
 
     context 'when :id param is valid, but required flight params are invalid' do
+      let(:errors_keys) {
+        [:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company]
+      }
+
       it 'returns a status code 400 and correct error keys' do
         patch api_flight_path(existing_flight.id),
               params: {
                 flight: {
-                  name: '', no_of_seats: '', base_price: '', departs_at: '',
-                  arrives_at: '', company_id: existing_flight.id + 1
+                  name: '', no_of_seats: '', base_price: '', departs_at: '', arrives_at: '',
+                  company_id: existing_flight.id + 1
                 }
               }
 
         expect(response).to have_http_status :bad_request
-        error_keys = ['name', 'no_of_seats', 'base_price', 'departs_at', 'arrives_at', 'company']
-        expect(response_body(:errors).keys).to match_array(error_keys)
+        expect(response_body(:errors).keys).to match_array(errors_keys)
       end
     end
 
     context 'when :id param is valid, but the flight params are missing' do
+      let(:returned_flight) { response_body(:flight) }
+
       it 'returns a status code 200 and an unmodified flight' do
         patch api_flight_path(existing_flight.id), params: { flight: random_hash }
 
         expect(response).to have_http_status :ok
-        returned_flight = response_body(:flight)
-        expect(returned_flight['name']).to          eq existing_flight.name
-        expect(returned_flight['no_of_seats']).to   eq existing_flight.no_of_seats
-        expect(returned_flight['base_price']).to    eq existing_flight.base_price
-        expect(returned_flight['departs_at']).to    eq stringify_time(existing_flight.departs_at)
-        expect(returned_flight['arrives_at']).to    eq stringify_time(existing_flight.arrives_at)
-        expect(returned_flight['created_at']).to    eq stringify_time(existing_flight.created_at)
-        expect(returned_flight['updated_at']).to    eq stringify_time(existing_flight.updated_at)
-        expect(returned_flight['company']['id']).to eq existing_flight.company_id
+        expect(returned_flight[:name]).to         eq existing_flight.name
+        expect(returned_flight[:no_of_seats]).to  eq existing_flight.no_of_seats
+        expect(returned_flight[:base_price]).to   eq existing_flight.base_price
+        expect(returned_flight[:departs_at]).to   eq stringify_time(existing_flight.departs_at)
+        expect(returned_flight[:arrives_at]).to   eq stringify_time(existing_flight.arrives_at)
+        expect(returned_flight[:created_at]).to   eq stringify_time(existing_flight.created_at)
+        expect(returned_flight[:updated_at]).to   eq stringify_time(existing_flight.updated_at)
+        expect(returned_flight[:company][:id]).to eq existing_flight.company_id
       end
     end
 
     context 'when all params are valid' do
       let!(:new_company) { create(:company) }
       let!(:new_flight)  { build(:flight, company_id: new_company.id) }
+      let(:updated_flight) { response_body(:flight) }
 
       it 'returns a status code 200 and an updated flight with the correct attributes' do
         patch api_flight_path(existing_flight.id),
-              params: { flight: stringify_time_values(new_flight.attributes) }
+              params: { flight: stringify_time_values(new_flight.attributes.compact) }
 
         expect(response).to have_http_status :ok
-        updated_flight = response_body(:flight)
-        expect(updated_flight['name']).to           eq new_flight.name
-        expect(updated_flight['no_of_seats']).to    eq new_flight.no_of_seats
-        expect(updated_flight['base_price']).to     eq new_flight.base_price
-        expect(updated_flight['departs_at']).to     eq stringify_time(new_flight.departs_at)
-        expect(updated_flight['arrives_at']).to     eq stringify_time(new_flight.arrives_at)
-        expect(updated_flight['created_at']).to     eq stringify_time(existing_flight.created_at)
-        expect(updated_flight['updated_at']).not_to eq stringify_time(existing_flight.updated_at)
-        expect(updated_flight['company']['id']).to  eq new_flight.company_id
+        expect(updated_flight[:name]).to           eq new_flight.name
+        expect(updated_flight[:no_of_seats]).to    eq new_flight.no_of_seats
+        expect(updated_flight[:base_price]).to     eq new_flight.base_price
+        expect(updated_flight[:departs_at]).to     eq stringify_time(new_flight.departs_at)
+        expect(updated_flight[:arrives_at]).to     eq stringify_time(new_flight.arrives_at)
+        expect(updated_flight[:created_at]).to     eq stringify_time(existing_flight.created_at)
+        expect(updated_flight[:updated_at]).not_to eq stringify_time(existing_flight.updated_at)
+        expect(updated_flight[:company][:id]).to   eq new_flight.company_id
       end
     end
   end
@@ -223,7 +229,7 @@ RSpec.describe 'Flights API', type: :request do
     end
 
     context 'when :id param is valid' do
-      it 'returns a status code 204 and deletes the flight' do
+      it 'returns a status code 204 without any content and deletes the flight' do
         expect { delete api_flight_path(existing_flight.id) }.to \
           change(Flight, :count).from(1).to(0)
 

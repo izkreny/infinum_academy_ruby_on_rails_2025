@@ -14,16 +14,18 @@ RSpec.describe Booking, type: :model do
   end
 
   describe 'business logic' do
-    it 'is sad if departure time of the flight is in the past' do
-      past_flight = create(:flight, departs_at: 10.days.ago)
-      booking_for_the_past_flight = build(:booking, flight: past_flight)
-      expect(booking_for_the_past_flight.valid?).to be false
+    context 'when departure time of the flight is in the past' do
+      let!(:past_flight)                { create(:flight, departs_at: 10.days.ago) }
+      let(:booking_for_the_past_flight) { build(:booking, flight: past_flight) }
+
+      it { expect(booking_for_the_past_flight.valid?).to be false }
     end
 
-    it 'is happy if departure time of the flight is in the future' do
-      regular_flight = create(:flight)
-      booking_for_the_regular_flight = build(:booking, flight: regular_flight)
-      expect(booking_for_the_regular_flight.valid?).to be true
+    context 'when departure time of the flight is in the future' do
+      let!(:regular_flight)                { create(:flight) }
+      let(:booking_for_the_regular_flight) { build(:booking, flight: regular_flight) }
+
+      it { expect(booking_for_the_regular_flight.valid?).to be true }
     end
   end
 end

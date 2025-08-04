@@ -17,18 +17,17 @@ RSpec.describe Flight, type: :model do
   end
 
   describe 'business logic' do
-    it 'is sad if departure time is after the arrival time' do
-      backward_flight = build(
-        :flight,
-        departs_at: 11.days.from_now,
-        arrives_at: 10.days.from_now
-      )
-      expect(backward_flight.valid?).to be false
+    let(:backward_flight) do
+      build(:flight, departs_at: 11.days.from_now, arrives_at: 10.days.from_now)
+    end
+    let(:regular_flight) { build(:flight) }
+
+    context 'when departure time is after the arrival time' do
+      it { expect(backward_flight.valid?).to be false }
     end
 
-    it 'is happy if departure time is before the arrival time' do
-      regular_flight = build(:flight)
-      expect(regular_flight.valid?).to be true
+    context 'when departure time is before the arrival time' do
+      it { expect(regular_flight.valid?).to be true }
     end
   end
 end

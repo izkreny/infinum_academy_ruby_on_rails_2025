@@ -37,14 +37,15 @@ RSpec.describe 'Companies API', type: :request do
     end
 
     context 'when :id param is valid' do
+      let(:returned_company) { response_body(:company) }
+
       it 'returns a status code 200 and a single company with the correct attributes' do
         get api_company_path(existing_company.id)
 
         expect(response).to have_http_status :ok
-        returned_company = response_body(:company)
-        expect(returned_company['name']).to       eq existing_company.name
-        expect(returned_company['created_at']).to eq stringify_time(existing_company.created_at)
-        expect(returned_company['updated_at']).to eq stringify_time(existing_company.updated_at)
+        expect(returned_company[:name]).to       eq existing_company.name
+        expect(returned_company[:created_at]).to eq stringify_time(existing_company.created_at)
+        expect(returned_company[:updated_at]).to eq stringify_time(existing_company.updated_at)
       end
     end
   end
@@ -82,7 +83,7 @@ RSpec.describe 'Companies API', type: :request do
         post api_companies_path, params: { company: random_hash }
 
         expect(response).to have_http_status :bad_request
-        expect(response_body(:errors).keys).to contain_exactly('name')
+        expect(response_body(:errors).keys).to contain_exactly(:name)
       end
     end
 
@@ -95,7 +96,7 @@ RSpec.describe 'Companies API', type: :request do
         }.to change(Company, :count).from(0).to(1)
 
         expect(response).to have_http_status :created
-        expect(response_body(:company)['name']).to eq new_company.name
+        expect(response_body(:company)[:name]).to eq new_company.name
       end
     end
   end
@@ -105,8 +106,7 @@ RSpec.describe 'Companies API', type: :request do
 
     context 'when :id param is invalid' do
       it 'returns a status code 404 without any content' do
-        patch api_company_path(existing_company.id + 1),
-              params: { company: random_hash }
+        patch api_company_path(existing_company.id + 1), params: { company: random_hash }
 
         expect(response).to have_http_status :not_found
         expect(response.body).to be_empty
@@ -145,33 +145,34 @@ RSpec.describe 'Companies API', type: :request do
         put api_company_path(existing_company.id), params: { company: { name: '' } }
 
         expect(response).to have_http_status :bad_request
-        expect(response_body(:errors).keys).to contain_exactly('name')
+        expect(response_body(:errors).keys).to contain_exactly(:name)
       end
     end
 
     context 'when :id param is valid, but the company params are missing' do
+      let(:returned_company) { response_body(:company) }
+
       it 'returns a status code 200 and an unmodified company' do
         patch api_company_path(existing_company.id), params: { company: random_hash }
 
         expect(response).to have_http_status :ok
-        returned_company = response_body(:company)
-        expect(returned_company['name']).to       eq existing_company.name
-        expect(returned_company['created_at']).to eq stringify_time(existing_company.created_at)
-        expect(returned_company['updated_at']).to eq stringify_time(existing_company.updated_at)
+        expect(returned_company[:name]).to       eq existing_company.name
+        expect(returned_company[:created_at]).to eq stringify_time(existing_company.created_at)
+        expect(returned_company[:updated_at]).to eq stringify_time(existing_company.updated_at)
       end
     end
 
     context 'when all params are valid' do
-      let!(:new_company) { build(:company) }
+      let!(:new_company)    { build(:company) }
+      let(:updated_company) { response_body(:company) }
 
       it 'returns a status code 200 and an updated company with the correct attributes' do
         patch api_company_path(existing_company.id), params: { company: { name: new_company.name } }
 
         expect(response).to have_http_status :ok
-        updated_company = response_body(:company)
-        expect(updated_company['name']).to           eq new_company.name
-        expect(updated_company['created_at']).to     eq stringify_time(existing_company.created_at)
-        expect(updated_company['updated_at']).not_to eq stringify_time(existing_company.updated_at)
+        expect(updated_company[:name]).to           eq new_company.name
+        expect(updated_company[:created_at]).to     eq stringify_time(existing_company.created_at)
+        expect(updated_company[:updated_at]).not_to eq stringify_time(existing_company.updated_at)
       end
     end
   end
@@ -189,7 +190,7 @@ RSpec.describe 'Companies API', type: :request do
     end
 
     context 'when :id param is valid' do
-      it 'returns a status code 204 and deletes the company' do
+      it 'returns a status code 204 without any content and deletes the company' do
         expect { delete api_company_path(existing_company.id) }.to \
           change(Company, :count).from(1).to(0)
 

@@ -36,16 +36,17 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when :id param is valid' do
+      let(:returned_user) { response_body(:user) }
+
       it 'returns a status code 200 and a single user with the correct attributes' do
         get api_user_path(existing_user.id)
 
         expect(response).to have_http_status :ok
-        returned_user = response_body(:user)
-        expect(returned_user['first_name']).to eq existing_user.first_name
-        expect(returned_user['last_name']).to  eq existing_user.last_name
-        expect(returned_user['email']).to      eq existing_user.email
-        expect(returned_user['created_at']).to eq stringify_time(existing_user.created_at)
-        expect(returned_user['updated_at']).to eq stringify_time(existing_user.updated_at)
+        expect(returned_user[:first_name]).to eq existing_user.first_name
+        expect(returned_user[:last_name]).to  eq existing_user.last_name
+        expect(returned_user[:email]).to      eq existing_user.email
+        expect(returned_user[:created_at]).to eq stringify_time(existing_user.created_at)
+        expect(returned_user[:updated_at]).to eq stringify_time(existing_user.updated_at)
       end
     end
   end
@@ -79,27 +80,28 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when the required user params are missing' do
+      let(:required_params) { [:first_name, :email] }
+
       it 'returns a status code 400 and correct error keys' do
         post api_users_path, params: { user: random_hash }
 
         expect(response).to have_http_status :bad_request
-        required_params = ['first_name', 'email']
         expect(response_body(:errors).keys).to match_array(required_params)
       end
     end
 
     context 'when all params are valid' do
-      let!(:new_user) { build(:user) }
+      let!(:new_user)    { build(:user) }
+      let(:created_user) { response_body(:user) }
 
       it 'returns a status code 201 and a created user with the correct attributes' do
         expect { post api_users_path, params: { user: new_user.attributes.compact } }.to \
           change(User, :count).from(0).to(1)
 
         expect(response).to have_http_status :created
-        created_user = response_body(:user)
-        expect(created_user['first_name']).to eq new_user.first_name
-        expect(created_user['last_name']).to  eq new_user.last_name
-        expect(created_user['email']).to      eq new_user.email
+        expect(created_user[:first_name]).to eq new_user.first_name
+        expect(created_user[:last_name]).to  eq new_user.last_name
+        expect(created_user[:email]).to      eq new_user.email
       end
     end
   end
@@ -145,44 +147,46 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when :id param is valid, but required user params are invalid' do
+      let(:errors_keys) { [:first_name, :email] }
+
       it 'returns a status code 400 and correct error keys' do
         patch api_user_path(existing_user.id),
               params: { user: { first_name: '', last_name: '', email: '' } }
 
         expect(response).to have_http_status :bad_request
-        error_keys = ['first_name', 'email']
-        expect(response_body(:errors).keys).to match_array(error_keys)
+        expect(response_body(:errors).keys).to match_array(errors_keys)
       end
     end
 
     context 'when :id param is valid, but the user params are missing' do
+      let(:returned_user) { response_body(:user) }
+
       it 'returns a status code 200 and an unmodified user' do
         patch api_user_path(existing_user.id), params: { user: random_hash }
 
         expect(response).to have_http_status :ok
-        returned_user = response_body(:user)
-        expect(returned_user['first_name']).to eq existing_user.first_name
-        expect(returned_user['last_name']).to  eq existing_user.last_name
-        expect(returned_user['email']).to      eq existing_user.email
-        expect(returned_user['created_at']).to eq stringify_time(existing_user.created_at)
-        expect(returned_user['updated_at']).to eq stringify_time(existing_user.updated_at)
+        expect(returned_user[:first_name]).to eq existing_user.first_name
+        expect(returned_user[:last_name]).to  eq existing_user.last_name
+        expect(returned_user[:email]).to      eq existing_user.email
+        expect(returned_user[:created_at]).to eq stringify_time(existing_user.created_at)
+        expect(returned_user[:updated_at]).to eq stringify_time(existing_user.updated_at)
       end
     end
 
     context 'when all params are valid' do
-      let!(:new_user) { build(:user) }
+      let!(:new_user)    { build(:user) }
+      let(:updated_user) { response_body(:user) }
 
       it 'returns a status code 200 and an updated user with the correct attributes' do
         patch api_user_path(existing_user.id),
               params: { user: new_user.attributes.compact }
 
         expect(response).to have_http_status :ok
-        updated_user = response_body(:user)
-        expect(updated_user['first_name']).to     eq new_user.first_name
-        expect(updated_user['last_name']).to      eq new_user.last_name
-        expect(updated_user['email']).to          eq new_user.email
-        expect(updated_user['created_at']).to     eq stringify_time(existing_user.created_at)
-        expect(updated_user['updated_at']).not_to eq stringify_time(existing_user.updated_at)
+        expect(updated_user[:first_name]).to     eq new_user.first_name
+        expect(updated_user[:last_name]).to      eq new_user.last_name
+        expect(updated_user[:email]).to          eq new_user.email
+        expect(updated_user[:created_at]).to     eq stringify_time(existing_user.created_at)
+        expect(updated_user[:updated_at]).not_to eq stringify_time(existing_user.updated_at)
       end
     end
   end
@@ -200,7 +204,7 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when :id param is valid' do
-      it 'returns a status code 204 and deletes the user' do
+      it 'returns a status code 204 without any content and deletes the user' do
         expect { delete api_user_path(existing_user.id) }.to \
           change(User, :count).from(1).to(0)
 
