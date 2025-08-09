@@ -12,12 +12,12 @@ class ApplicationController < ActionController::Base
           .singularize.downcase
   end
 
-  # Why #where and not #find? To avoid raising error:
+  # Why #find_by and not #find? To avoid raising error:
   # 'ActionController::Parameters#require': param is missing or
   # the value is empty: model_name (ActionController::ParameterMissing)
   def find_object
     eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
-      @#{model_name} = #{model_name.capitalize}.where(id: params[:id]).first
+      @#{model_name} = #{model_name.capitalize}.find_by(id: params[:id])
       head :not_found if #{model_name}.nil?
     RUBY
   end
