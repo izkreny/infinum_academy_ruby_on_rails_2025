@@ -4,33 +4,27 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   skip_before_action :verify_authenticity_token
 
-  def render_errors_and_bad_request_status(errors)
-    render json: { errors: errors }, status: :bad_request
-  end
-
-  def find_object
-    model_name =
+  def model_name
+    @model_name ||=
       self.class.name
           .delete_prefix('Api::')
           .delete_suffix('Controller')
           .singularize.downcase
+  end
+
+  # Why #where and not #find? To avoid raising error:
+  # 'ActionController::Parameters#require': param is missing or
+  # the value is empty: model_name (ActionController::ParameterMissing)
+  def find_object
     eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
       @#{model_name} = #{model_name.capitalize}.where(id: params[:id]).first
       head :not_found if #{model_name}.nil?
     RUBY
   end
 
-  # Why, o why this only does NOT work inside the #create Controller method?!?
-  #   Failure/Error: eval "render json: { errors: #{model_name}.errors }, status: :bad_request"
-  #   NoMethodError: undefined method 'errors' for nil
-  # def render_errors_and_bad_request_status
-  #   model_name =
-  #     self.class.name
-  #         .delete_prefix('Api::')
-  #         .delete_suffix('Controller')
-  #         .singularize.downcase
-  #   eval <<-RUBY, binding, __FILE__, __LINE__ + 1
-  #     render json: { errors: #{model_name}.errors }, status: :bad_request
-  #   RUBY
-  # end
+  def render_errors_and_bad_request_status
+    eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
+      render json: { errors: #{model_name}.errors }, status: :bad_request
+    RUBY
+  end
 end

@@ -21,12 +21,12 @@ module Api
 
     # POST /api/bookings
     def create
-      booking = Booking.new(booking_params)
+      @booking = Booking.new(booking_params)
 
       if booking.save
         render json: BookingSerializer.render(booking, root: :booking), status: :created
       else
-        render_errors_and_bad_request_status(booking.errors)
+        render_errors_and_bad_request_status
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if booking.update(booking_params)
         render json: BookingSerializer.render(booking, root: :booking), status: :ok
       else
-        render_errors_and_bad_request_status(booking.errors)
+        render_errors_and_bad_request_status
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if booking.destroy
         head :no_content
       else
-        render_errors_and_bad_request_status(booking.errors)
+        render_errors_and_bad_request_status
       end
     end
 

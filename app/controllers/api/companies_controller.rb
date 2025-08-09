@@ -21,12 +21,12 @@ module Api
 
     # POST /api/companies
     def create
-      company = Company.new(company_params)
+      @company = Company.new(company_params)
 
       if company.save
         render json: CompanySerializer.render(company, root: :company), status: :created
       else
-        render_errors_and_bad_request_status(company.errors)
+        render_errors_and_bad_request_status
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if company.update(company_params)
         render json: CompanySerializer.render(company, root: :company), status: :ok
       else
-        render_errors_and_bad_request_status(company.errors)
+        render_errors_and_bad_request_status
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if company.destroy
         head :no_content
       else
-        render_errors_and_bad_request_status(company.errors)
+        render_errors_and_bad_request_status
       end
     end
 

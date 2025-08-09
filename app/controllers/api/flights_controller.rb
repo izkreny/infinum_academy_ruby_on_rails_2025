@@ -21,12 +21,12 @@ module Api
 
     # POST /api/flights
     def create
-      flight = Flight.new(flight_params)
+      @flight = Flight.new(flight_params)
 
       if flight.save
         render json: FlightSerializer.render(flight, root: :flight), status: :created
       else
-        render_errors_and_bad_request_status(flight.errors)
+        render_errors_and_bad_request_status
       end
     end
 
@@ -35,7 +35,7 @@ module Api
       if flight.update(flight_params)
         render json: FlightSerializer.render(flight, root: :flight), status: :ok
       else
-        render_errors_and_bad_request_status(flight.errors)
+        render_errors_and_bad_request_status
       end
     end
 
@@ -44,7 +44,7 @@ module Api
       if flight.destroy
         head :no_content
       else
-        render_errors_and_bad_request_status(flight.errors)
+        render_errors_and_bad_request_status
       end
     end
 
