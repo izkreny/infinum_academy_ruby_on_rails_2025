@@ -5,18 +5,18 @@ module Api
 
     # GET /api/companies
     def index
-      companies = Company.all
+      @companies = Company.all
 
       if companies.empty?
         head :no_content
       else
-        render json: CompanySerializer.render(companies, root: :companies), status: :ok
+        render_objects status: :ok
       end
     end
 
     # GET /api/companies/:id
     def show
-      render json: CompanySerializer.render(company, root: :company), status: :ok
+      render_object status: :ok
     end
 
     # POST /api/companies
@@ -24,7 +24,7 @@ module Api
       @company = Company.new(company_params)
 
       if company.save
-        render json: CompanySerializer.render(company, root: :company), status: :created
+        render_object status: :created
       else
         render_errors_and_bad_request_status
       end
@@ -33,7 +33,7 @@ module Api
     # PUT & PATCH /api/companies/:id
     def update
       if company.update(company_params)
-        render json: CompanySerializer.render(company, root: :company), status: :ok
+        render_object status: :ok
       else
         render_errors_and_bad_request_status
       end
@@ -50,7 +50,7 @@ module Api
 
     private
 
-    attr_reader :company
+    attr_reader :company, :companies
 
     def company_params
       if params.key?(:company)

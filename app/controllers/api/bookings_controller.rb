@@ -5,18 +5,18 @@ module Api
 
     # GET /api/bookings
     def index
-      bookings = Booking.all
+      @bookings = Booking.all
 
       if bookings.empty?
         head :no_content
       else
-        render json: BookingSerializer.render(bookings, root: :bookings), status: :ok
+        render_objects status: :ok
       end
     end
 
     # GET /api/bookings/:id
     def show
-      render json: BookingSerializer.render(booking, root: :booking), status: :ok
+      render_object status: :ok
     end
 
     # POST /api/bookings
@@ -24,7 +24,7 @@ module Api
       @booking = Booking.new(booking_params)
 
       if booking.save
-        render json: BookingSerializer.render(booking, root: :booking), status: :created
+        render_object status: :created
       else
         render_errors_and_bad_request_status
       end
@@ -33,7 +33,7 @@ module Api
     # PUT & PATCH /api/bookings/:id
     def update
       if booking.update(booking_params)
-        render json: BookingSerializer.render(booking, root: :booking), status: :ok
+        render_object status: :ok
       else
         render_errors_and_bad_request_status
       end
@@ -50,7 +50,7 @@ module Api
 
     private
 
-    attr_reader :booking
+    attr_reader :booking, :bookings
 
     def booking_params
       if params.key?(:booking)

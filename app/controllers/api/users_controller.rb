@@ -5,18 +5,18 @@ module Api
 
     # GET /api/users
     def index
-      users = User.all
+      @users = User.all
 
       if users.empty?
         head :no_content
       else
-        render json: UserSerializer.render(users, root: :users), status: :ok
+        render_objects status: :ok
       end
     end
 
     # GET /api/users/:id
     def show
-      render json: UserSerializer.render(user, root: :user), status: :ok
+      render_object status: :ok
     end
 
     # POST /api/users
@@ -24,7 +24,7 @@ module Api
       @user = User.new(user_params)
 
       if user.save
-        render json: UserSerializer.render(user, root: :user), status: :created
+        render_object status: :created
       else
         render_errors_and_bad_request_status
       end
@@ -33,7 +33,7 @@ module Api
     # PUT & PATCH /api/users/:id
     def update
       if user.update(user_params)
-        render json: UserSerializer.render(user, root: :user), status: :ok
+        render_object status: :ok
       else
         render_errors_and_bad_request_status
       end
@@ -50,7 +50,7 @@ module Api
 
     private
 
-    attr_reader :user
+    attr_reader :user, :users
 
     def user_params
       if params.key?(:user)

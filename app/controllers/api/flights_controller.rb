@@ -5,18 +5,18 @@ module Api
 
     # GET /api/flights
     def index
-      flights = Flight.all
+      @flights = Flight.all
 
       if flights.empty?
         head :no_content
       else
-        render json: FlightSerializer.render(flights, root: :flights), status: :ok
+        render_objects status: :ok
       end
     end
 
     # GET /api/flights/:id
     def show
-      render json: FlightSerializer.render(flight, root: :flight), status: :ok
+      render_object status: :ok
     end
 
     # POST /api/flights
@@ -24,7 +24,7 @@ module Api
       @flight = Flight.new(flight_params)
 
       if flight.save
-        render json: FlightSerializer.render(flight, root: :flight), status: :created
+        render_object status: :created
       else
         render_errors_and_bad_request_status
       end
@@ -33,7 +33,7 @@ module Api
     # PUT & PATCH /api/flights/:id
     def update
       if flight.update(flight_params)
-        render json: FlightSerializer.render(flight, root: :flight), status: :ok
+        render_object status: :ok
       else
         render_errors_and_bad_request_status
       end
@@ -50,7 +50,7 @@ module Api
 
     private
 
-    attr_reader :flight
+    attr_reader :flight, :flights
 
     def flight_params
       if params.key?(:flight)
