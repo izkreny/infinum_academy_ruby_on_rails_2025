@@ -7,6 +7,10 @@
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
+# Indexes
+#
+#  index_companies_on_name  (name) UNIQUE
+#
 class Company < ApplicationRecord
   has_many :flights, dependent: :destroy
   has_many :bookings, through: :flights

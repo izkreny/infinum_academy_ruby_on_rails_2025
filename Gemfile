@@ -47,7 +47,7 @@ group :development, :test do
   gem 'rubocop-rails-omakase', require: false
 
   # Ruby on Rails academy
-  gem 'annotate'
+  gem 'annotaterb'
   gem 'blueprinter'
   gem 'factory_bot_rails'
   gem 'faker'
