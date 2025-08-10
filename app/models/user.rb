@@ -16,6 +16,7 @@
 #  index_users_on_email             (email) UNIQUE
 #
 class User < ApplicationRecord
+  has_secure_password :password
   has_many :bookings, dependent: :destroy
   has_many :flights, through: :bookings
 

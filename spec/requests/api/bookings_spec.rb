@@ -154,7 +154,7 @@ RSpec.describe 'Bookings API', type: :request do
     end
 
     context 'when :id param is valid, but required booking params are invalid' do
-      let(:errors_keys) { [:no_of_seats, :seat_price, :user, :flight] }
+      let(:required_params) { [:no_of_seats, :seat_price, :user, :flight] }
 
       it 'returns a status code 400 and correct error keys' do
         patch api_booking_path(existing_booking.id),
@@ -167,7 +167,7 @@ RSpec.describe 'Bookings API', type: :request do
               }
 
         expect(response).to have_http_status :bad_request
-        expect(response_body(:errors).keys).to match_array(errors_keys)
+        expect(response_body(:errors).keys).to match_array(required_params)
       end
     end
 

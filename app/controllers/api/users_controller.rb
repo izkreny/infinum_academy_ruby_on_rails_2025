@@ -54,7 +54,10 @@ module Api
 
     def user_params
       if params.key?(:user)
-        @user_params ||= params.require(:user).permit(:first_name, :last_name, :email)
+        @user_params ||=
+          params
+          .require(:user)
+          .permit(:first_name, :last_name, :email, :password_digest)
       else
         head :bad_request
       end

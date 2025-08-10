@@ -20,4 +20,7 @@ class UserSerializer < Blueprinter::Base
 
   fields :first_name, :email, :created_at, :updated_at
   field :last_name, exclude_if_nil: true
+  field :password do |user| # rubocop:disable Style/SymbolProc
+    user.password_digest
+  end
 end

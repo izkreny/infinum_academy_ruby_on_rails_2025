@@ -45,6 +45,7 @@ RSpec.describe 'Users API', type: :request do
         expect(returned_user[:first_name]).to eq existing_user.first_name
         expect(returned_user[:last_name]).to  eq existing_user.last_name
         expect(returned_user[:email]).to      eq existing_user.email
+        expect(returned_user[:password]).to   eq existing_user.password_digest
         expect(returned_user[:created_at]).to eq stringify_time(existing_user.created_at)
         expect(returned_user[:updated_at]).to eq stringify_time(existing_user.updated_at)
       end
@@ -80,7 +81,7 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when the required user params are missing' do
-      let(:required_params) { [:first_name, :email] }
+      let(:required_params) { [:first_name, :email, :password] }
 
       it 'returns a status code 400 and correct error keys' do
         post api_users_path, params: { user: random_hash }
@@ -102,6 +103,7 @@ RSpec.describe 'Users API', type: :request do
         expect(created_user[:first_name]).to eq new_user.first_name
         expect(created_user[:last_name]).to  eq new_user.last_name
         expect(created_user[:email]).to      eq new_user.email
+        expect(created_user[:password]).to   eq new_user.password_digest
       end
     end
   end
@@ -147,14 +149,23 @@ RSpec.describe 'Users API', type: :request do
     end
 
     context 'when :id param is valid, but required user params are invalid' do
-      let(:errors_keys) { [:first_name, :email] }
+      let(:required_params) { [:first_name, :email, :password] }
 
       it 'returns a status code 400 and correct error keys' do
         patch api_user_path(existing_user.id),
-              params: { user: { first_name: '', last_name: '', email: '' } }
+              params: { user: { first_name: '', last_name: '', email: '', password_digest: '' } }
 
         expect(response).to have_http_status :bad_request
-        expect(response_body(:errors).keys).to match_array(errors_keys)
+        expect(response_body(:errors).keys).to match_array(required_params)
+      end
+    end
+
+    context 'when :id param is valid, but the user password is null' do
+      it 'returns a status code 400 and password error key' do
+        patch api_user_path(existing_user.id), params: { user: { password_digest: nil } }
+
+        expect(response).to have_http_status :bad_request
+        expect(response_body(:errors).keys).to contain_exactly(:password)
       end
     end
 
@@ -168,6 +179,7 @@ RSpec.describe 'Users API', type: :request do
         expect(returned_user[:first_name]).to eq existing_user.first_name
         expect(returned_user[:last_name]).to  eq existing_user.last_name
         expect(returned_user[:email]).to      eq existing_user.email
+        expect(returned_user[:password]).to   eq existing_user.password_digest
         expect(returned_user[:created_at]).to eq stringify_time(existing_user.created_at)
         expect(returned_user[:updated_at]).to eq stringify_time(existing_user.updated_at)
       end
@@ -185,6 +197,7 @@ RSpec.describe 'Users API', type: :request do
         expect(updated_user[:first_name]).to     eq new_user.first_name
         expect(updated_user[:last_name]).to      eq new_user.last_name
         expect(updated_user[:email]).to          eq new_user.email
+        expect(updated_user[:password]).to       eq new_user.password_digest
         expect(updated_user[:created_at]).to     eq stringify_time(existing_user.created_at)
         expect(updated_user[:updated_at]).not_to eq stringify_time(existing_user.updated_at)
       end

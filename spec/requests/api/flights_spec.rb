@@ -158,7 +158,7 @@ RSpec.describe 'Flights API', type: :request do
     end
 
     context 'when :id param is valid, but required flight params are invalid' do
-      let(:errors_keys) {
+      let(:required_params) {
         [:name, :no_of_seats, :base_price, :departs_at, :arrives_at, :company]
       }
 
@@ -172,7 +172,7 @@ RSpec.describe 'Flights API', type: :request do
               }
 
         expect(response).to have_http_status :bad_request
-        expect(response_body(:errors).keys).to match_array(errors_keys)
+        expect(response_body(:errors).keys).to match_array(required_params)
       end
     end
 
