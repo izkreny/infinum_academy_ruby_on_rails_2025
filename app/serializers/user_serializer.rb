@@ -7,6 +7,7 @@
 #  first_name      :string           not null
 #  last_name       :string
 #  password_digest :string
+#  token           :string
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #
@@ -14,6 +15,7 @@
 #
 #  functional_index_users_on_email  (lower((email)::text)) UNIQUE
 #  index_users_on_email             (email) UNIQUE
+#  index_users_on_token             (token) UNIQUE
 #
 class UserSerializer < Blueprinter::Base
   identifier :id
