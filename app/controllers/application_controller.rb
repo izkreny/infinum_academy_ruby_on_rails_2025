@@ -41,4 +41,15 @@ class ApplicationController < ActionController::Base
       render json: { errors: #{model_name}.errors }, status: :bad_request
     RUBY
   end
+
+  def render_errors_and_unauthorized_status
+    render json: { errors: { credentials: ['are invalid'] } }, status: :unauthorized
+  end
+
+  DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%9N %z'
+  def stringify_time_values(hash)
+    hash.deep_transform_values do |value|
+      value.respond_to?(:strftime) ? value.strftime(DATETIME_FORMAT) : value
+    end
+  end
 end

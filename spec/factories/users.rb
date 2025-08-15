@@ -22,6 +22,6 @@ FactoryBot.define do
     first_name      { Faker::Name.first_name }
     last_name       { Faker::Name.last_name }
     email           { Faker::Internet.unique.email(name: "#{first_name}.#{last_name}") }
-    password_digest { Faker::Internet.password(min_length: 10, max_length: 15) }
+    password_digest { Faker::Internet.unique.password(min_length: 10, max_length: 15) }
   end
 end

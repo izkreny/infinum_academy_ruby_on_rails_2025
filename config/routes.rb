@@ -16,7 +16,10 @@ Rails.application.routes.draw do
     resources :flights,   except: [:new, :edit]
     resources :bookings,  except: [:new, :edit]
     resources :companies, except: [:new, :edit]
+    post   '/session', controller: 'sessions', action: :create, as: 'session'
+    delete '/session', controller: 'sessions', action: :destroy
   end
 
+  # Catch all invalid URL requests
   match '*route', to: redirect('/404.html', status: :not_found), via: :all
 end
