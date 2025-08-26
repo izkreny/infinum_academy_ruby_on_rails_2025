@@ -1,6 +1,6 @@
 RSpec.describe 'Bookings API', type: :request do
   include TestHelpers::RequestsApi
-  # rubocop:disable Style/BlockDelimiters, RSpec/NestedGroups
+  # rubocop:disable Style/BlockDelimiters
   let(:existing_user)    { create(:user) }
   let(:existing_booking) { create(:booking, user: existing_user) }
 
@@ -442,5 +442,5 @@ RSpec.describe 'Bookings API', type: :request do
       end
     end
   end
-  # rubocop:enable Style/BlockDelimiters, RSpec/NestedGroups
+  # rubocop:enable Style/BlockDelimiters
 end

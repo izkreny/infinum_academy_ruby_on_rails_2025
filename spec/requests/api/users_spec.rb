@@ -1,5 +1,4 @@
 RSpec.describe 'Users API', type: :request do
-  # rubocop:disable RSpec/NestedGroups
   include TestHelpers::RequestsApi
   let(:existing_user) { create(:user) }
   let(:another_user)  { create(:user) }
@@ -346,5 +345,4 @@ RSpec.describe 'Users API', type: :request do
       end
     end
   end
-  # rubocop:enable RSpec/NestedGroups
 end

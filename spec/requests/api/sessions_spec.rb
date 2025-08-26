@@ -74,7 +74,6 @@ RSpec.describe 'Session API', type: :request do
   end
 
   describe 'DELETE /api/session' do
-    # rubocop:disable RSpec/NestedGroups
     context 'when user tries to authenticate' do
       context 'with empty request headers' do
         it 'returns a status code 401 and the correct error message' do
@@ -107,5 +106,4 @@ RSpec.describe 'Session API', type: :request do
       end
     end
   end
-  # rubocop:enable RSpec/NestedGroups
 end
