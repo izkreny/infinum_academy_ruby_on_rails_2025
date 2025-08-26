@@ -35,6 +35,9 @@ RSpec/MultipleExpectations:
 Style/MutableConstant:
   Enabled: false
 
+RSpec/NestedGroups:
+  Max: 5
+
 # RSpec/ImplicitExpect:
 #   EnforcedStyle: 'should'
 
