@@ -1,10 +1,12 @@
 module Api
   class UsersController < ApplicationController
-    before_action :find_object, only: [:show, :update, :destroy]
-    before_action :user_params, only: [:create, :update]
+    before_action :authenticate_user,       except: [:create, :index]
+    before_action :user_params,             only:   [:create, :update]
+    before_action :find_object, :authorize, only:   [:show, :update, :destroy]
 
     # GET /api/users
     def index
+      # TODO: unless admin!!!
       @users = User.all
 
       if users.empty?
@@ -61,6 +63,10 @@ module Api
       else
         head :bad_request
       end
+    end
+
+    def authorize
+      render_resource_errors_and_forbidden_status if @authenticated_user.id != user.id
     end
   end
 end

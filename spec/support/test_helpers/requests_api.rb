@@ -24,5 +24,36 @@ module TestHelpers
         value.respond_to?(:strftime) ? value.strftime(DATETIME_FORMAT) : value
       end
     end
+
+    # Add shared examples for authentication via Claude AI BS -- NOT WORKING!!!
+    RSpec.shared_examples 'authenticable endpoint' do |method, path_proc|
+      context 'when user tries to authenticate' do
+        context 'with empty request headers' do
+          it 'returns a status code 401 and the correct error message' do
+            send(method, path_proc.call)
+
+            expect(response).to have_http_status :unauthorized
+            expect(response_body(:errors)[:token]).to eq(['is invalid'])
+          end
+        end
+
+        context 'with invalid "Authorization" header value' do
+          it 'returns a status code 401 and the correct error message' do
+            send(method, path_proc.call, headers: { Authorization: '' })
+
+            expect(response).to have_http_status :unauthorized
+            expect(response_body(:errors)[:token]).to eq(['is invalid'])
+          end
+        end
+      end
+    end
+
+    # describe 'PATCH /api/users/:id' do
+    #   let!(:existing_user) { create(:user) }
+
+    #   it_behaves_like 'authenticable endpoint', :patch, -> { api_user_path(existing_user.id) }
+
+    #   # ... rest of the specs
+    # end
   end
 end

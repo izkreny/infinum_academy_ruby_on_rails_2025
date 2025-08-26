@@ -4,6 +4,19 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   skip_before_action :verify_authenticity_token
 
+  def authenticate_user
+    auth_token = request.headers['Authorization']
+
+    if auth_token.nil?
+      render_token_errors_and_unauthorized_status
+    else
+      # When to use ActiveSupport::SecurityUtils.secure_compare() instead?
+      # TODO: class Current < ActiveSupport::CurrentAttributes; attribute :user; end
+      @authenticated_user = User.find_by(token: auth_token)
+      render_token_errors_and_unauthorized_status if @authenticated_user.nil?
+    end
+  end
+
   def model_name
     @model_name ||=
       self.class.name
@@ -42,8 +55,16 @@ class ApplicationController < ActionController::Base
     RUBY
   end
 
-  def render_errors_and_unauthorized_status
+  def render_credentials_errors_and_unauthorized_status
     render json: { errors: { credentials: ['are invalid'] } }, status: :unauthorized
+  end
+
+  def render_token_errors_and_unauthorized_status
+    render json: { errors: { token: ['is invalid'] } }, status: :unauthorized
+  end
+
+  def render_resource_errors_and_forbidden_status
+    render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
   end
 
   DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%9N %z'

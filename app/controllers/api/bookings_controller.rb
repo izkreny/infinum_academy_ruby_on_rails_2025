@@ -1,11 +1,13 @@
 module Api
   class BookingsController < ApplicationController
-    before_action :find_object,    only: [:show, :update, :destroy]
-    before_action :booking_params, only: [:create, :update]
+    before_action :authenticate_user
+    before_action :booking_params,          only: [:create, :update]
+    before_action :find_object, :authorize, only: [:show, :update, :destroy]
 
     # GET /api/bookings
     def index
-      @bookings = Booking.all
+      # TODO: admin see all
+      @bookings = Booking.where(user_id: @authenticated_user.id)
 
       if bookings.empty?
         head :no_content
@@ -23,7 +25,9 @@ module Api
     def create
       @booking = Booking.new(booking_params)
 
-      if booking.save
+      if not_authorized?
+        render_resource_errors_and_forbidden_status
+      elsif booking.save
         render_object status: :created
       else
         render_errors_and_bad_request_status
@@ -32,7 +36,9 @@ module Api
 
     # PUT & PATCH /api/bookings/:id
     def update
-      if booking.update(booking_params)
+      if booking.user_id != booking_params[:user_id].to_i
+        render_resource_errors_and_forbidden_status
+      elsif booking.update(booking_params)
         render_object status: :ok
       else
         render_errors_and_bad_request_status
@@ -61,6 +67,14 @@ module Api
       else
         head :bad_request
       end
+    end
+
+    def not_authorized?
+      @authenticated_user.id != booking.user_id
+    end
+
+    def authorize
+      render_resource_errors_and_forbidden_status if not_authorized?
     end
   end
 end
