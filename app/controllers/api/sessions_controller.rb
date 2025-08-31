@@ -20,7 +20,7 @@ module Api
 
     # DELETE /api/session
     def destroy
-      if @authenticated_user.regenerate_token
+      if Current.user.regenerate_token
         head :no_content
       else
         render_errors_and_bad_request_status

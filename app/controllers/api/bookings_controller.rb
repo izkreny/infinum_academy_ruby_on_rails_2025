@@ -7,7 +7,7 @@ module Api
     # GET /api/bookings
     def index
       # TODO: admin see all
-      @bookings = Booking.where(user_id: @authenticated_user.id)
+      @bookings = Booking.where(user_id: Current.user.id)
 
       if bookings.empty?
         head :no_content
@@ -70,7 +70,7 @@ module Api
     end
 
     def not_authorized?
-      @authenticated_user.id != booking.user_id
+      Current.user != booking.user
     end
 
     def authorize

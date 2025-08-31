@@ -66,7 +66,7 @@ module Api
     end
 
     def authorize
-      render_resource_errors_and_forbidden_status if @authenticated_user.id != user.id
+      render_resource_errors_and_forbidden_status if Current.user != user
     end
   end
 end

@@ -11,9 +11,8 @@ class ApplicationController < ActionController::Base
       render_token_errors_and_unauthorized_status
     else
       # When to use ActiveSupport::SecurityUtils.secure_compare() instead?
-      # TODO: class Current < ActiveSupport::CurrentAttributes; attribute :user; end
-      @authenticated_user = User.find_by(token: auth_token)
-      render_token_errors_and_unauthorized_status if @authenticated_user.nil?
+      Current.user = User.find_by(token: auth_token)
+      render_token_errors_and_unauthorized_status if Current.user.nil?
     end
   end
 
