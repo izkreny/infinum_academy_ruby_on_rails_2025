@@ -4,6 +4,7 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
   skip_before_action :verify_authenticity_token
 
+  # AUTHENTICATION
   def authenticate_user
     auth_token = request.headers['Authorization']
 
@@ -13,6 +14,19 @@ class ApplicationController < ActionController::Base
       # When to use ActiveSupport::SecurityUtils.secure_compare() instead?
       Current.user = User.find_by(token: auth_token)
       render_token_errors_and_unauthorized_status if Current.user.nil?
+    end
+  end
+
+  # AUTHORIZATION
+  def authorize_user
+    Current.new
+  end
+
+  # HELPER METHODS
+  DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%9N %z'
+  def stringify_time_values(hash)
+    hash.deep_transform_values do |value|
+      value.respond_to?(:strftime) ? value.strftime(DATETIME_FORMAT) : value
     end
   end
 
@@ -32,9 +46,10 @@ class ApplicationController < ActionController::Base
     RUBY
   end
 
+  # RENDERING OBJECT(S)
   def render_object(status:)
     eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
-      render json:    #{model_name.capitalize}Serializer.render(#{model_name},
+      render json: #{model_name.capitalize}Serializer.render(#{model_name},
                root: :#{model_name}),
              status: :#{status}
     RUBY
@@ -42,18 +57,13 @@ class ApplicationController < ActionController::Base
 
   def render_objects(status:)
     eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
-      render json:    #{model_name.capitalize}Serializer.render(#{model_name.pluralize},
+      render json: #{model_name.capitalize}Serializer.render(#{model_name.pluralize},
                root: :#{model_name.pluralize}),
              status: :#{status}
     RUBY
   end
 
-  def render_errors_and_bad_request_status
-    eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
-      render json: { errors: #{model_name}.errors }, status: :bad_request
-    RUBY
-  end
-
+  # RENDERING ERRORS
   def render_credentials_errors_and_unauthorized_status
     render json: { errors: { credentials: ['are invalid'] } }, status: :unauthorized
   end
@@ -66,10 +76,9 @@ class ApplicationController < ActionController::Base
     render json: { errors: { resource: ['forbidden'] } }, status: :forbidden
   end
 
-  DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%9N %z'
-  def stringify_time_values(hash)
-    hash.deep_transform_values do |value|
-      value.respond_to?(:strftime) ? value.strftime(DATETIME_FORMAT) : value
-    end
+  def render_errors_and_bad_request_status
+    eval <<-RUBY, binding, __FILE__, __LINE__ + 1 # rubocop:disable Security/Eval
+      render json: { errors: #{model_name}.errors }, status: :bad_request
+    RUBY
   end
 end
