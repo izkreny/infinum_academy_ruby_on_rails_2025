@@ -26,4 +26,17 @@ class User < ApplicationRecord
   EMAIL_REGEXP = /[\w._%+-]+@[\w.-]+\.\w{2,}/ # URI::MailTo::EMAIL_REGEXP
   validates :first_name, presence: true, length: { minimum: 2 }
   validates :email, presence: true, uniqueness: { case_sensitive: false }, format: EMAIL_REGEXP
+
+  ROLES = {
+    'admin' => 'administrator',
+    'user' => 'customer',
+    nil => 'public'
+  }
+  validates :role, inclusion: ROLES.map { |db_name, _public_name| db_name }
+
+  ROLES.each do |role, method_name|
+    define_method "#{method_name}?" do
+      self.role == role
+    end
+  end
 end
