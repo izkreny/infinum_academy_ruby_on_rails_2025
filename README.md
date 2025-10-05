@@ -1,0 +1,1 @@
+# infinum_academy_ruby_on_rails_2025
