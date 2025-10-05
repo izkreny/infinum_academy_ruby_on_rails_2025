@@ -1,0 +1,148 @@
+RSpec.describe OpenWeatherMap::City do
+  describe '#new creates a new object and' do
+    city = described_class.new(
+      id: 2_152_667,
+      lat: -38.3333,
+      lon: 141.6,
+      name: 'Portland',
+      temp_k: 285.58
+    )
+
+    it 'correctly initialises all instance variables' do
+      expect(city.id).to   eq 2_152_667
+      expect(city.lat).to  eq(-38.3333)
+      expect(city.lon).to  eq 141.6
+      expect(city.name).to eq 'Portland'
+    end
+
+    it 'correctly converts temperature from Kelvin to Celsius' do
+      expect(city.temp).to eq 12.43
+    end
+  end
+
+  describe 'two new objects' do
+    it 'compare correctly if the left one has a lower temperature than the right one' do
+      colder = described_class.new(
+        id: 2_759_794, lat: 52.374, lon: 4.8897,
+        name: 'Amsterdam', temp_k: 292.28
+      )
+      warmer = described_class.new(
+        id: 2_152_667, lat: -38.3333, lon: 141.6,
+        name: 'Portland', temp_k: 292.29
+      )
+      expect(colder < warmer).to be true
+    end
+
+    it 'compare correctly if the left one has a higher temperature than the right one' do
+      warmer = described_class.new(
+        id: 2_759_794, lat: 52.374, lon: 4.8897,
+        name: 'Amsterdam', temp_k: 292.29
+      )
+      colder = described_class.new(
+        id: 2_152_667, lat: -38.3333, lon: 141.6,
+        name: 'Portland', temp_k: 292.28
+      )
+      expect(warmer > colder).to be true
+    end
+
+    it 'compare correctly if their temperature is equal, ' \
+       'but the left comes first alphabetically' do
+      alphabetically_first = described_class.new(
+        id: 2_759_794, lat: 52.374, lon: 4.8897,
+        name: 'Amsterdam', temp_k: 292.29
+      )
+      alphabetically_second = described_class.new(
+        id: 2_152_667, lat: -38.3333, lon: 141.6,
+        name: 'Portland', temp_k: 292.29
+      )
+      expect(alphabetically_first < alphabetically_second).to be true
+    end
+
+    it 'compare correctly if their temperature is equal, ' \
+       'but the left comes second alphabetically' do
+      alphabetically_second = described_class.new(
+        id: 2_152_667, lat: -38.3333, lon: 141.6,
+        name: 'Portland', temp_k: 292.29
+      )
+      alphabetically_first = described_class.new(
+        id: 2_759_794, lat: 52.374, lon: 4.8897,
+        name: 'Amsterdam', temp_k: 292.29
+      )
+      expect(alphabetically_second > alphabetically_first).to be true
+    end
+
+    it 'compare correctly if their temperature and name are equal' do
+      equal_temp_and_name_left = described_class.new(
+        id: 2_759_794, lat: 52.374, lon: 4.8897,
+        name: 'Amsterdam', temp_k: 292.29
+      )
+      equal_temp_and_name_right = described_class.new(
+        id: 2_759_794, lat: 52.374, lon: 4.8897,
+        name: 'Amsterdam', temp_k: 292.29
+      )
+      expect(equal_temp_and_name_left == equal_temp_and_name_right).to be true
+    end
+  end
+
+  describe '#parse is called with the response argument and' do
+    # rubocop:disable Style
+    response = {
+      "coord" => {
+        "lon" => 4.8897,
+        "lat" => 52.374
+      },
+      "weather" => [
+        {
+          "id" => 802,
+          "main" => "Clouds",
+          "description" => "scattered clouds",
+          "icon" => "03d"
+        }
+      ],
+      "base" => "stations",
+      "main" => {
+        "temp" => 293.21,
+        "feels_like" => 293.07,
+        "temp_min" => 292.51,
+        "temp_max" => 294.25,
+        "pressure" => 1014,
+        "humidity" => 69,
+        "sea_level" => 1014,
+        "grnd_level" => 1013
+      },
+      "visibility" => 10000,
+      "wind" => {
+        "speed" => 7.72,
+        "deg" => 300
+      },
+      "clouds" => {
+        "all" => 40
+      },
+      "dt" => 1752681216,
+      "sys" => {
+        "type" => 2,
+        "id" => 2046553,
+        "country" => "NL",
+        "sunrise" => 1752637060,
+        "sunset" => 1752695695
+      },
+      "timezone" => 7200,
+      "id" => 2759794,
+      "name" => "Amsterdam",
+      "cod" => 200
+    }
+    # rubocop:enable Style
+    city = described_class.parse(response)
+
+    it 'correctly initialises all instance variables' do
+      expect(city.id).to   eq 2_759_794
+      expect(city.lat).to  eq 52.374
+      expect(city.lon).to  eq 4.8897
+      expect(city.name).to eq 'Amsterdam'
+    end
+
+    it 'correctly converts temperature from Kelvin to Celsius' do
+      expect(city.temp).to eq 20.06
+    end
+  end
+end
