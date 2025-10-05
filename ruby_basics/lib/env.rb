@@ -1,0 +1,11 @@
+require File.expand_path('all_letters', __dir__)
+require File.expand_path('class_objects', __dir__)
+require File.expand_path('compress', __dir__)
+require File.expand_path('election_winner', __dir__)
+require File.expand_path('holes', __dir__)
+require File.expand_path('open_class', __dir__)
+require File.expand_path('phonetic_alphabet', __dir__)
+require File.expand_path('shatro', __dir__)
+require File.expand_path('spinning_words', __dir__)
+require File.expand_path('sum_digits', __dir__)
+require 'pry'
